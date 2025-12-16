@@ -1,0 +1,75 @@
+@import "tailwindcss";
+@theme {
+  --color-primary: #B88E52;
+  --color-secondary: #49494A;
+  --color-gray: #6b6b6b;
+  --color-light-gray: #f8fafd;
+  --color-danger: #ff4d4f
+
+
+  
+}
+html, body {
+/* font-family: 'Inter', sans-serif;
+    font-weight: 400; */
+    scroll-behavior: smooth;
+  }
+
+.rtl{
+  direction: rtl;
+}
+
+body::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+body::-webkit-scrollbar-track {
+  background: var(--color-secondary);
+}
+
+/* Handle */
+body::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 30px;
+  width: 5px;
+}
+
+/* Handle on hover */
+body::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+  cursor: pointer;
+}
+
+.cutom-scroll,body{
+  /* scrollbar-width: thin; */
+  scroll-behavior: smooth;
+
+}
+.cutom-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+.cutom-scroll::-webkit-scrollbar-track {
+  background: var(--color-secondary);
+}
+
+/* Handle */
+.cutom-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 30px;
+  width: 5px;
+}
+
+/* Handle on hover */
+.cutom-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+  cursor: pointer;
+}
+
+html, body, #root { height: 100%; }
+button {
+  cursor: pointer;
+}
+
