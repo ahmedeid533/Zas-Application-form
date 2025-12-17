@@ -1,10 +1,12 @@
 import { createBrowserRouter, Navigate, Outlet, RouterProvider } from "react-router-dom";
 import { lazy, Suspense, useEffect } from "react";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-import Home from "../../pages/home/Home";
+// import Navbar from "./Navbar";
+// import Footer from "./Footer";
+// import Home from "../../pages/home/Home";
 import Loading from "../../pages/loading/Loading";
 import ApplyingForm from "../../pages/ApplyingForm/ApplyingForm";
+import Navbar from "./Navbar";
+import Footer from "./Footer";
 
 function Main() {
 
@@ -18,7 +20,7 @@ function Main() {
         <div className="flex-1 relative h-full">
         <Outlet />
         </div>
-        {/* <Footer/> */}
+        <Footer/>
       </main>
     </>
   );
@@ -75,7 +77,7 @@ function Layout() {
       element: <Main />,children: [
         { index: true, element: <ApplyingForm/>},
     {
-      path:"/cv",
+      path:"/job-application",
       element:<ApplyingForm/>
     }
   ],}]

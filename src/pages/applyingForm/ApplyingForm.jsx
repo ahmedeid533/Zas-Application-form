@@ -1,8 +1,13 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
 import * as Yup from "yup";
 import { FaTrashAlt } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
+import { GetDepartments, GetDepartment,GetGenders,GetLocations,GetJobs, GetCountries, GetHowDoYouKnow } from "../../assets/apis/applyingJob/ApplyingJobApi";
+import { useQuery } from "@tanstack/react-query";
+import { IoCheckmarkSharp } from "react-icons/io5";
+import { useScreenViewStore } from "../../assets/store/screenViewStore";
+import { uploadToCloudinary } from "../../cloudinary/cloudinary";
 
 /**
  * ApplyingForm — React component (code/react)
@@ -17,7 +22,7 @@ import { IoIosArrowDown } from "react-icons/io";
  * - Location split into three parts: country, city, area
  */
 
-const API_URL = "/api/apply"; // <-- Replace with your real endpoint
+const API_URL = "https://apitest.skyculinaire.com/api/CV/CVTransaction/NewEmployee"; 
 
 // Minimal country list (can be extended to full list easily)
 const COUNTRY_CODES = [
@@ -94,6 +99,39 @@ export default function ApplyingForm() {
   const [submitted, setSubmitted] = useState(null); // will hold last-submitted metadata
   const [apiError, setApiError] = useState(null);
   const [apiSuccess, setApiSuccess] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(null);
+
+  const [selectedArea, setSelectedArea] = useState(null);
+  const {footerHeight,navBarHeight}=useScreenViewStore();
+
+  const { data: departments, isLoading: loadingDeps } = useQuery({
+    queryKey: ["departments"],
+    queryFn: GetDepartments,
+  });
+  const { data: jobs, isLoading: loadingJobs } = useQuery({
+    queryKey: ["jobs"],
+    queryFn: GetJobs,
+  });
+
+  const { data: genders, isLoading: loadingGenders } = useQuery({
+    queryKey: ["genders"],
+    queryFn: GetGenders,
+  });
+    const { data: countries, isLoading: loadingCountries } = useQuery({
+    queryKey: ["countries"],
+    queryFn: GetCountries,
+  });
+
+      const { data: howDoYouKnew, isLoading: loadingHowDoYouKnew } = useQuery({
+    queryKey: ["howDoYouKnew"],
+    queryFn: GetHowDoYouKnow,
+  });
+
+  useEffect(() => {
+    console.log("howDoYouKnew",howDoYouKnew);
+    
+  }, [howDoYouKnew]);
 
   // validation
   const SUPPORTED_CV = [
@@ -122,11 +160,14 @@ export default function ApplyingForm() {
     birthDate: Yup.date().nullable(),
     email: Yup.string().email("Invalid email").required("Email is required"),
     phoneCode: Yup.string().required("Code"),
-    phone: Yup.string().trim().required("Phone is required"),
+    secondPhoneCode: Yup.string(),
+    phone: Yup.string().trim().required("Phone is required").min(5, "Invalid phone"),
+    secondPhone: Yup.string().trim().min(5, "Invalid phone"),
     location: Yup.object().shape({
       country: Yup.string().required("Country is required"),
       city: Yup.string().trim().required("City is required"),
       area: Yup.string().trim().required("Area is required"),
+      address: Yup.string().trim().required("Address is required"),
     }),
     linkedin: Yup.string().url("Invalid URL"),
     github: Yup.string().url("Invalid URL"),
@@ -160,9 +201,11 @@ export default function ApplyingForm() {
     birthDate: "",
     email: "",
     phoneCode: "+20",
+    secondPhoneCode: "+20",
     phone: "",
+    secondPhone: "",
     // location is now an object with 3 parts
-    location: { country: "", city: "", area: "" },
+    location: { country: "", city: "", area: "", address: "" },
     linkedin: "",
     github: "",
     source: "",
@@ -181,6 +224,85 @@ export default function ApplyingForm() {
     ],
   };
 
+const getUniqueItems = (data, key) => {
+  // تأكد من أننا نعمل على مصفوفة فعلية
+  const arr = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
+  const uniqueItems = [];
+  const seenKeys = new Set();
+
+  for (const item of arr) {
+    if (!item || !(key in item)) continue; // تجاهل العناصر الغير متوقعة
+    const keyValue = item[key];
+    if (!seenKeys.has(keyValue)) {
+      seenKeys.add(keyValue);
+      uniqueItems.push(item);
+    }
+  }
+
+  return uniqueItems;
+};
+
+
+// تحديثات صغيرة في الحالة/المعالجة
+const handleCountryChange = (value, setFieldValue) => {
+  // استخدم string لأن قيم الـ select عادةً سترسل string
+  const v = value || "";
+  setSelectedCountry(v);
+  setSelectedCity(null);
+  setSelectedArea(null);
+  // امسح حقول المدينة والمنطقة في formik
+  if (setFieldValue) {
+    setFieldValue("location.city", "");
+    setFieldValue("location.area", "");
+  }
+};
+
+const handleCityChange = (value, setFieldValue) => {
+  const v = value || "";
+  setSelectedCity(v);
+  setSelectedArea(null);
+  if (setFieldValue) {
+    setFieldValue("location.area", "");
+  }
+};
+
+
+  const countriesArray = Array.isArray(countries) ? countries : (countries && Array.isArray(countries.data) ? countries.data : []);
+
+const uniqueCountries = useMemo(() => {
+  return getUniqueItems(countriesArray, "countryID");
+}, [countries]);
+
+const uniqueCities = useMemo(() => {
+  if (!selectedCountry) return [];
+  return getUniqueItems(
+    countries.filter(
+      (item) => item.countryID === Number(selectedCountry)
+    ),
+    "cityID"
+  );
+}, [countries, selectedCountry]);
+
+
+const uniqueAreas = useMemo(() => {
+  return getUniqueItems(
+    countriesArray.filter((item) => item.countryID == selectedCountry && item.cityID == selectedCity),
+    "ariaID"
+  );
+}, [countries, selectedCountry, selectedCity]);
+
+
+// return (
+//   <div className="flex flex-col items-center justify-center gap-1 text-center" style={{
+//   height: `calc(100vh - ${navBarHeight + footerHeight}px)`
+// }}>
+//     <IoCheckmarkSharp className="text-[300px] text-green-500"/>
+//     <p className="text-3xl font-bold">Thank You!</p>
+//     <p className="sm:text-2xl text-xl">Your application was successfully submitted</p>
+//     <p className="text-xl text-gray-600">We will contact you soon</p>
+//   </div>
+// )
+
   return (
     <div className="min-h-screen flex items-start justify-center p-6 bg-gradient-to-b from-white to-gray-50">
       <div className="w-full max-w-5xl">
@@ -191,41 +313,53 @@ export default function ApplyingForm() {
             setApiError(null);
             setApiSuccess(null);
 
+            const personalImage=values.photo?await uploadToCloudinary(values.photo):"";
+            const cv=values.cv?await uploadToCloudinary(values.cv):"";
+            console.log(personalImage,cv);
+            
+
             // build FormData
             try {
-              const formData = new FormData();
-
-              // append primitive fields
-              Object.entries(values).forEach(([key, val]) => {
-                if (val === null || val === undefined) return;
-
-                // files handled separately
-                if (key === "cv" || key === "photo") return;
-
-                // convert boolean/objects to string (objects/arrays will be JSON-stringified)
-                formData.append(
-                  key,
-                  typeof val === "object" ? JSON.stringify(val) : String(val)
-                );
-              });
-
-              // append files
-              if (values.cv) formData.append("cv", values.cv, values.cv.name);
-              if (values.photo)
-                formData.append("photo", values.photo, values.photo.name);
-
-              // debug helper (can't stringify FormData directly in console reliably)
-              // console.log('formData entries:', Array.from(formData.entries()));
-
-              // POST to API
               const res = await fetch(API_URL, {
-                method: "POST",
-                body: formData,
-                // Do not set Content-Type; browser will set multipart/form-data boundary
-                headers: {
-                  Accept: "application/json",
-                },
-              });
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "*/*",
+  },
+  body: JSON.stringify({
+    personalId: 0,
+    personalName: `${values.firstName} ${values.middleName} ${values.lastName}`,
+    personalDepartmentId: Number(values.department),
+    personalJopId: Number(values.position),
+    // personalSocialId: 0,
+    personalBerthDate: values.birthDate,
+    personalMoble: `${values.secondPhoneCode} ${values.secondPhone}`,
+    personalPhone: `${values.phoneCode} ${values.phone}`,
+    personalMail: values.email,
+    personalCountryId: Number(values.location.country),
+    personalCityId: Number(values.location.city),
+    personalCityAreaId: Number(values.location.area),
+    personalStreet: values.location.address,
+    personalGenderId: Number(values.gender),
+    personalCvLinkedInProfile: values.linkedin,
+    personalCvGithubProfile: values.github,
+    personalCvCoverNote: values.cover,
+    personalCvHowNowAboutUsId: Number(values.source),
+    personalCvUploadPickt:personalImage,
+    personalCvUploadCV: cv,
+    personalCvsWorkExperiences: values.experiences?.map(e => ({
+      personalCvsWorkExperienceCompanyName: e.company,
+      personalCvsWorkExperienceRole: e.role,
+      personalCvsWorkExperienceYear: Number(e.years),
+    })) || [],
+    peronalCvsEducations: values.education?.map(e => ({
+      peronalCvEducationInstitution: e.institution,
+      peronalCvEducationDegree: Number(e.degree),
+      peronalCvEducationGraduationYear: Number(e.year),
+    })) || [],
+  }),
+});
+
 
               const data = await res.json().catch(() => null);
 
@@ -294,125 +428,217 @@ export default function ApplyingForm() {
               {/* Personal Data card */}
               <section className="mt-6  rounded-xl">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-                <div className="bg-light-gray p-4 rounded-lg ">
-
-                
-                <h3 className="text-sm font-semibold text-secondary mb-3">
-                  Personal Data
-                </h3>
-                                  <div>
-                    <label className="block text-secondary text-sm mb-1">
-                      First Name{" "}
-                      <span className="ms-1 font-semibold">(required)</span>
-                    </label>
-                    <Field
-                      name="firstName"
-                      placeholder="First"
-                      className={`w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.12)] focus:border-primary ${
-                        errors.firstName && touched.firstName
-                          ? "border-danger"
-                          : "border-gray-200"
-                      }`}
-                    />
-                    <ErrorMessage
-                      name="firstName"
-                      component="div"
-                      className="text-danger text-xs mt-1"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-secondary text-sm mb-1">
-                      Middle Name
-                    </label>
-                    <Field
-                      name="middleName"
-                      placeholder="Middle"
-                      className={`w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)] focus:border-primary ${
-                        errors.middleName && touched.middleName
-                          ? "border-danger"
-                          : "border-gray-200"
-                      }`}
-                    />
-                    <ErrorMessage
-                      name="middleName"
-                      component="div"
-                      className="text-danger text-xs mt-1"
-                    />
-                  </div>
-                                    <div>
-                    <label className="block text-secondary text-sm mb-1">
-                      Last Name{" "}
-                      <span className="ms-1 font-semibold">(required)</span>
-                    </label>
-                    <Field
-                      name="lastName"
-                      placeholder="Last"
-                      className={`w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.12)] focus:border-primary ${
-                        errors.lastName && touched.lastName
-                          ? "border-danger"
-                          : "border-gray-200"
-                      }`}
-                    />
-                    <ErrorMessage
-                      name="lastName"
-                      component="div"
-                      className="text-danger text-xs mt-1"
-                    />
-                  </div>
-                                    <div>
-                    <label className="block text-secondary text-sm mb-1">
-                      Birth Date
-                    </label>
-                    <div className="relative">
+                  <div className="bg-light-gray p-4 rounded-lg flex flex-col gap-2.5 ">
+                    <h3 className="text-sm font-semibold text-secondary mb-3">
+                      Personal Data
+                    </h3>
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        First Name{" "}
+                        <span className="ms-1 font-semibold">(required)</span>
+                      </label>
                       <Field
-                        name="birthDate"
-                        type="date"
+                        name="firstName"
+                        placeholder="First"
                         className={`w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.12)] focus:border-primary ${
-                          errors.birthDate && touched.birthDate
+                          errors.firstName && touched.firstName
                             ? "border-danger"
                             : "border-gray-200"
                         }`}
                       />
-                      <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray">
+                      <ErrorMessage
+                        name="firstName"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        Middle Name
+                      </label>
+                      <Field
+                        name="middleName"
+                        placeholder="Middle"
+                        className={`w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)] focus:border-primary ${
+                          errors.middleName && touched.middleName
+                            ? "border-danger"
+                            : "border-gray-200"
+                        }`}
+                      />
+                      <ErrorMessage
+                        name="middleName"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        Last Name{" "}
+                        <span className="ms-1 font-semibold">(required)</span>
+                      </label>
+                      <Field
+                        name="lastName"
+                        placeholder="Last"
+                        className={`w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.12)] focus:border-primary ${
+                          errors.lastName && touched.lastName
+                            ? "border-danger"
+                            : "border-gray-200"
+                        }`}
+                      />
+                      <ErrorMessage
+                        name="lastName"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        Birth Date
+                      </label>
+                      <div className="relative">
+                        <Field
+                          name="birthDate"
+                          type="date"
+                          className={`w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.12)] focus:border-primary ${
+                            errors.birthDate && touched.birthDate
+                              ? "border-danger"
+                              : "border-gray-200"
+                          }`}
+                        />
+                        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray">
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M7 10H9"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M15 10H15.01"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M21 7V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V7"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M16 3V7"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M8 3V7"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                      <ErrorMessage
+                        name="birthDate"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
+                    </div>
+
+                    {/* Row: First Name + Middle Name (inline two fields) */}
+                    {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+
+                </div> */}
+
+                    {/* Row: Last Name + Birth Date */}
+                    {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+
+
+
+                </div> */}
+
+                    {/* Photo + Gender (photo left small, gender right) */}
+                    {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center"> */}
+
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        Gender
+                      </label>
+                      <div className="relative">
+                        <Field
+                          as="select"
+                          name="gender"
+                          className="w-full rounded-full border px-4 py-2 pr-10 text-sm bg-white
+                      focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)]
+                      focus:border-primary border-gray-200 appearance-none"
+                        >
+                          <option value="">Select Gender</option>
+                          {genders &&
+                            genders.length > 0 &&
+                            genders.map((gender) => (
+                              <option
+                                className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
+                                value={gender.personalGenderId}
+                              >
+                                {gender?.personalGenderName}
+                              </option>
+                            ))}
+                        </Field>
+                        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
+                          <IoIosArrowDown />
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        Photo
+                      </label>
+                      <div
+                        onClick={() => photoRef.current?.click()}
+                        className="w-full rounded-full border border-gray-200 px-4 py-2 text-sm flex items-center justify-between bg-white cursor-pointer"
+                      >
+                        <span className="text-gray">
+                          {values.photo ? values.photo.name : "Upload photo"}
+                        </span>
                         <svg
                           width="18"
                           height="18"
                           viewBox="0 0 24 24"
                           fill="none"
                           xmlns="http://www.w3.org/2000/svg"
+                          className="text-gray"
                         >
                           <path
-                            d="M7 10H9"
+                            d="M12 16V8"
                             stroke="currentColor"
                             strokeWidth="1.5"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           />
                           <path
-                            d="M15 10H15.01"
+                            d="M8 12L12 8L16 12"
                             stroke="currentColor"
                             strokeWidth="1.5"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           />
                           <path
-                            d="M21 7V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V7"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M16 3V7"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M8 3V7"
+                            d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15"
                             stroke="currentColor"
                             strokeWidth="1.5"
                             strokeLinecap="round"
@@ -420,433 +646,464 @@ export default function ApplyingForm() {
                           />
                         </svg>
                       </div>
+                      <input
+                        ref={photoRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) =>
+                          setFieldValue(
+                            "photo",
+                            e.currentTarget.files?.[0] || null
+                          )
+                        }
+                      />
+                      <ErrorMessage
+                        name="photo"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
                     </div>
-                    <ErrorMessage
-                      name="birthDate"
-                      component="div"
-                      className="text-danger text-xs mt-1"
-                    />
                   </div>
 
-                {/* Row: First Name + Middle Name (inline two fields) */}
-                {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-
-                </div> */}
-
-                {/* Row: Last Name + Birth Date */}
-                {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-
-
-
-                </div> */}
-
-                {/* Photo + Gender (photo left small, gender right) */}
-                {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center"> */}
-                  <div>
-                    <label className="block text-secondary text-sm mb-1">
-                      Photo
-                    </label>
-                    <div
-                      onClick={() => photoRef.current?.click()}
-                      className="w-full rounded-full border border-gray-200 px-4 py-2 text-sm flex items-center justify-between bg-white cursor-pointer"
-                    >
-                      <span className="text-gray">
-                        {values.photo ? values.photo.name : "Upload photo"}
-                      </span>
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="text-gray"
-                      >
-                        <path
-                          d="M12 16V8"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M8 12L12 8L16 12"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </div>
-                    <input
-                      ref={photoRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) =>
-                        setFieldValue(
-                          "photo",
-                          e.currentTarget.files?.[0] || null
-                        )
-                      }
-                    />
-                    <ErrorMessage
-                      name="photo"
-                      component="div"
-                      className="text-danger text-xs mt-1"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-secondary text-sm mb-1">
-                      Gender
-                    </label>
-                    <div className="relative">
-
-                    <Field
-                      as="select"
-                      name="gender"
-                      className="w-full rounded-full border px-4 py-2 pr-10 text-sm bg-white
-                      focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)]
-                      focus:border-primary border-gray-200 appearance-none"
-                      >
-                      <option className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white" value="">Prefer not to say</option>
-                      <option className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white" value="male">Male</option>
-                      <option className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white" value="female">Female</option>
-                    </Field>
-                                          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
-                        <IoIosArrowDown />
-                      </span>
-                      </div>
-                  </div>
-                  </div>
-
-                  <div className="bg-light-gray p-4 rounded-lg ">
-
-                
-                <h3 className="text-sm font-semibold text-secondary mb-3">
-                  Address
-                </h3>
-                                  <div>
-                    <label className="block text-secondary text-sm mb-1">
-                      Country{" "}
-                      <span className="ms-1 font-semibold">(required)</span>
-                    </label>
-                    <div className="relative">
-
-                    <Field
-                      as="select"
-                      name="location.country"
-                      className={`w-full rounded-full border px-4 py-2 pr-10 text-sm bg-white
+                  <div className="bg-light-gray p-4 rounded-lg flex flex-col gap-2.5">
+                    <h3 className="text-sm font-semibold text-secondary mb-3">
+                      Address Information
+                    </h3>
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        Country{" "}
+                        <span className="ms-1 font-semibold">(required)</span>
+                      </label>
+                      <div className="relative">
+                        <Field
+                          as="select"
+                          name="location.country"
+                          className={`w-full rounded-full border px-4 py-2 pr-10 text-sm bg-white
                       focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)]
                       focus:border-primary  appearance-none ${
                         errors.location?.country && touched.location?.country
-                        ? "border-danger"
-                        : "border-gray-200"
-                      }`}
-                      >
-                      <option value="">Select country</option>
-                      {COUNTRY_CODES.map((c) => (
-                        <option className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white" key={c.code} value={c.label}>
-                          {c.label}
-                        </option>
-                      ))}
-                    </Field>
-                                          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
-                        <IoIosArrowDown />
-                      </span>
-                      </div>
-                    <ErrorMessage
-                      name="location.country"
-                      component="div"
-                      className="text-danger text-xs mt-1"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-secondary text-sm mb-1">
-                      City<span className="ms-1 font-semibold">(required)</span>
-                    </label>
-                    <Field
-                      name="location.city"
-                      placeholder="City"
-                      className={`w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)] focus:border-primary
-                        ${
-                          errors.location?.city && touched.location?.city
-                            ? "border-danger"
-                            : "border-gray-200"
-                        }`}
-                    />
-                    <ErrorMessage
-                      name="location.city"
-                      component="div"
-                      className="text-danger text-xs mt-1"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-secondary text-sm mb-1">
-                      Area / District
-                      <span className="ms-1 font-semibold">(required)</span>
-                    </label>
-                    <Field
-                      name="location.area"
-                      placeholder="Area / District"
-                      className={`w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)] focus:border-primary
-                        ${
-                          errors.location?.area && touched.location?.area
-                            ? "border-danger"
-                            : "border-gray-200"
-                        }`}
-                    />
-                    <ErrorMessage
-                      name="location.area"
-                      component="div"
-                      className="text-danger text-xs mt-1"
-                    />
-                  </div>
-                  </div>
-
-                  <div className="bg-light-gray p-4 rounded-lg ">
-
-                
-                <h3 className="text-sm font-semibold text-secondary mb-3">
-                  Contact Info
-                </h3>
-                                  <div>
-                    <label className="block text-secondary text-sm mb-1">
-                      Email{" "}
-                      <span className="ms-1 font-semibold">(required)</span>
-                    </label>
-                    <Field
-                      name="email"
-                      type="email"
-                      placeholder="you@domain.com"
-                      className={`w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.12)] focus:border-primary ${
-                        errors.email && touched.email
                           ? "border-danger"
                           : "border-gray-200"
                       }`}
-                    />
-                    <ErrorMessage
-                      name="email"
-                      component="div"
-                      className="text-danger text-xs mt-1"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-secondary text-sm mb-1">
-                      Phone{" "}
-                      <span className="ms-1 font-semibold">(required)</span>
-                    </label>
-                    <div
-                      className={`flex items-center w-full rounded-full border bg-white overflow-hidden
-      focus-within:ring-2 focus-within:ring-[rgba(184,142,82,0.12)]
-      ${errors.phone && touched.phone ? "border-danger" : "border-gray-200"}`}
-                    >
-                      {/* Country code */}
-                      <Field
-                        as="select"
-                        name="phoneCode"
-                        className="h-full bg-transparent px-3 py-2 text-sm text-secondary border-r border-gray-200 focus:outline-none"
-                      >
-                        {COUNTRY_CODES.map((c) => (
-                          <option className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white justify-between" key={c.code} value={c.code}>
-                              <span>{c.label}</span>
-                              <span>{c.code}</span>
-                            
-                          </option>
-                        ))}
-                      </Field>
-
-                      {/* Phone number */}
-                      <Field
-                        name="phone"
-                        placeholder="xxx xxx xxxx"
-                        className="flex-1 px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none"
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            handleCountryChange(value, setFieldValue);
+                            setFieldValue("location.country", value);
+                          }}
+                        >
+                          <option value="">Select country</option>
+                          {uniqueCountries &&
+                            uniqueCountries.map((c) => (
+                              <option
+                                className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
+                                key={c.countryID}
+                                value={c.countryID}
+                              >
+                                {c.countryName}
+                              </option>
+                            ))}
+                        </Field>
+                        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
+                          <IoIosArrowDown />
+                        </span>
+                      </div>
+                      <ErrorMessage
+                        name="location.country"
+                        component="div"
+                        className="text-danger text-xs mt-1"
                       />
                     </div>
 
-                    <ErrorMessage
-                      name="phone"
-                      component="div"
-                      className="text-danger text-xs mt-1"
-                    />
-                  </div>
                     <div>
-                    <label className="block text-secondary text-sm mb-1">
-                      LinkedIn Profile
-                    </label>
-                    <Field
-                      name="linkedin"
-                      placeholder="https://linkedin.com/in/you"
-                      className="w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)] focus:border-primary border-gray-200"
-                    />
-                    <ErrorMessage
-                      name="linkedin"
-                      component="div"
-                      className="text-danger text-xs mt-1"
-                    />
-                  </div>
-
-                                      <div>
-                    <label className="block text-secondary text-sm mb-1">
-                      Github Profile
-                    </label>
-                    <Field
-                      name="github"
-                      placeholder="https://github.com/you"
-                      className="w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)] focus:border-primary border-gray-200"
-                    />
-                    <ErrorMessage
-                      name="github"
-                      component="div"
-                      className="text-danger text-xs mt-1"
-                    />
-                  </div>
-
-                 
-                 
-                 </div>
-
-                 <div className="bg-light-gray p-4 rounded-lg ">
-
-                
-                <h3 className="text-sm font-semibold text-secondary mb-3">
-                  Application Details
-                </h3>
-
-                  <div>
-                    <label className="block text-secondary text-sm mb-1">
-                      How did you hear about us?
-                    </label>
-                    <div className="relative">
-                      <Field
-                        as="select"
-                        name="source"
-                        className="w-full rounded-full border px-4 py-2 pr-10 text-sm bg-white
+                      <label className="block text-secondary text-sm mb-1">
+                        city{" "}
+                        <span className="ms-1 font-semibold">(required)</span>
+                      </label>
+                      <div className="relative">
+                        <Field
+                          as="select"
+                          name="location.city"
+                          disabled={!selectedCountry}
+                          className={`w-full rounded-full border px-4 py-2 pr-10 text-sm ${
+                            selectedCountry ? "bg-white" : "bg-gray-200"
+                          } 
                       focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)]
-                      focus:border-primary border-gray-200 appearance-none"
-                      >
-                        <option
-                          className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
-                          value=""
-                        >
-                          Select...
-                        </option>
-                        <option
-                          className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
-                          value="LinkedIn"
-                        >
-                          LinkedIn
-                        </option>
-                        <option
-                          className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
-                          value="Company Website"
-                        >
-                          Company Website
-                        </option>
-                        <option
-                          className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
-                          value="Employee Referral"
-                        >
-                          Employee Referral
-                        </option>
-                        <option
-                          className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
-                          value="Job Fair"
-                        >
-                          Job Fair
-                        </option>
-                        <option
-                          className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
-                          value="Other"
-                        >
-                          Other
-                        </option>
-                      </Field>
-                      <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
-                        <IoIosArrowDown />
-                      </span>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-secondary text-sm mb-1">
-                      Department{" "}
-                      <span className="ms-1 font-semibold">(required)</span>
-                    </label>
-                    <div className="relative">
-
-                    <Field
-                      as="select"
-                      name="department"
-                      className={`w-full rounded-full border px-4 py-2 pr-10 text-sm bg-white
-                        focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)]
-                        focus:border-primary appearance-none ${
-                          errors.department && touched.department
-                          ? "border-danger"
-                          : "border-gray-200"
-                        }`}
-                        >
-                      <option className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white" value="">Select department</option>
-                      <option className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white" value="Technology/IT">Technology/IT</option>
-                      <option className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white" value="Marketing">Marketing</option>
-                      <option className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white" value="Sales">Sales</option>
-                      <option className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white" value="Finance">Finance</option>
-                      <option className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white" value="HR">HR</option>
-                    </Field>
-                                          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
-                        <IoIosArrowDown />
-                      </span>
-                      </div>
-                    <ErrorMessage
-                      name="department"
-                      component="div"
-                      className="text-danger text-xs mt-1"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-secondary text-sm mb-1">
-                      Position Applying For{" "}
-                      <span className="ms-1 font-semibold">(required)</span>
-                    </label>
-                    <Field
-                      name="position"
-                      placeholder="e.g. Senior Software Developer"
-                      className={`w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.12)] focus:border-primary ${
-                        errors.position && touched.position
+                      focus:border-primary  appearance-none ${
+                        errors.location?.city && touched.location?.city
                           ? "border-danger"
                           : "border-gray-200"
                       }`}
-                    />
-                    <ErrorMessage
-                      name="position"
-                      component="div"
-                      className="text-danger text-xs mt-1"
-                    />
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            handleCityChange(value, setFieldValue);
+                            setFieldValue("location.city", value);
+                          }}
+                        >
+                          <option value="">Select city</option>
+                          {uniqueCities &&
+                            uniqueCities.map((c) => (
+                              <option
+                                className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
+                                key={c.cityID}
+                                value={c.cityID}
+                              >
+                                {c.cityName}
+                              </option>
+                            ))}
+                        </Field>
+                        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
+                          <IoIosArrowDown />
+                        </span>
+                      </div>
+                      <ErrorMessage
+                        name="location.city"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        Area / District{" "}
+                        <span className="ms-1 font-semibold">(required)</span>
+                      </label>
+                      <div className="relative">
+                        <Field
+                          as="select"
+                          name="location.area"
+                          disabled={!selectedCountry || !selectedCity}
+                          className={`w-full rounded-full border px-4 py-2 pr-10 text-sm ${
+                            !selectedCountry || !selectedCity
+                              ? "bg-gray-200"
+                              : "bg-white"
+                          } 
+                      focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)]
+                      focus:border-primary  appearance-none ${
+                        errors.location?.area && touched.location?.area
+                          ? "border-danger"
+                          : "border-gray-200"
+                      }`}
+                        >
+                          <option value="">Select area</option>
+                          {uniqueAreas &&
+                            uniqueAreas.map((a) => (
+                              <option
+                                className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
+                                key={a.ariaID}
+                                value={a.ariaID}
+                              >
+                                {a.ariaName}
+                              </option>
+                            ))}
+                        </Field>
+                        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
+                          <IoIosArrowDown />
+                        </span>
+                      </div>
+                      <ErrorMessage
+                        name="location.area"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        Address{" "}
+                        <span className="ms-1 font-semibold">(required)</span>
+                      </label>
+                      <Field
+                        name="location.address"
+                        placeholder="address"
+                        className={`w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.12)] focus:border-primary ${
+                          errors.location?.address && touched.location?.address
+                            ? "border-danger"
+                            : "border-gray-200"
+                        }`}
+                      />
+                      <ErrorMessage
+                        name="location.address"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
+                    </div>
                   </div>
 
+                  <div className="bg-light-gray p-4 rounded-lg flex flex-col gap-2.5">
+                    <h3 className="text-sm font-semibold text-secondary mb-3">
+                      Contact Info
+                    </h3>
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        Email{" "}
+                        <span className="ms-1 font-semibold">(required)</span>
+                      </label>
+                      <Field
+                        name="email"
+                        type="email"
+                        placeholder="you@domain.com"
+                        className={`w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.12)] focus:border-primary ${
+                          errors.email && touched.email
+                            ? "border-danger"
+                            : "border-gray-200"
+                        }`}
+                      />
+                      <ErrorMessage
+                        name="email"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
+                    </div>
 
-                 
-                 </div>
-                  
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        Phone{" "}
+                        <span className="ms-1 font-semibold">(required)</span>
+                      </label>
+                      <div
+                        className={`flex items-center w-full rounded-full border bg-white overflow-hidden
+      focus-within:ring-2 focus-within:ring-[rgba(184,142,82,0.12)]
+      ${errors.phone && touched.phone ? "border-danger" : "border-gray-200"}`}
+                      >
+                        {/* Country code */}
+                        <Field
+                          as="select"
+                          name="phoneCode"
+                          className="h-full bg-transparent px-3 py-2 text-sm text-secondary border-r border-gray-200 focus:outline-none"
+                        >
+                          {COUNTRY_CODES.map((c) => (
+                            <option
+                              className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white justify-between"
+                              key={c.code}
+                              value={c.code}
+                            >
+                              <span>{c.label}</span>
+                              <span>{c.code}</span>
+                            </option>
+                          ))}
+                        </Field>
 
+                        {/* Phone number */}
+                        <Field
+                          name="phone"
+                          placeholder="xxx xxx xxxx"
+                          className="flex-1 px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none"
+                        />
+                      </div>
 
+                      <ErrorMessage
+                        name="phone"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        Second Phone{" "}
+                      </label>
+                      <div
+                        className={`flex items-center w-full rounded-full border bg-white overflow-hidden
+      focus-within:ring-2 focus-within:ring-[rgba(184,142,82,0.12)]
+      ${errors.secondPhone && touched.secondPhone ? "border-danger" : "border-gray-200"}`}
+                      >
+                        {/* Country code */}
+                        <Field
+                          as="select"
+                          name="secondPhoneCode"
+                          className="h-full bg-transparent px-3 py-2 text-sm text-secondary border-r border-gray-200 focus:outline-none"
+                        >
+                          {COUNTRY_CODES.map((c) => (
+                            <option
+                              className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white justify-between"
+                              key={c.code}
+                              value={c.code}
+                            >
+                              <span>{c.label}</span>
+                              <span>{c.code}</span>
+                            </option>
+                          ))}
+                        </Field>
 
+                        {/* Phone number */}
+                        <Field
+                          name="secondPhone"
+                          placeholder="xxx xxx xxxx"
+                          className="flex-1 px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none"
+                        />
+                      </div>
+
+                      <ErrorMessage
+                        name="secondPhone"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        LinkedIn Profile
+                      </label>
+                      <Field
+                        name="linkedin"
+                        placeholder="https://linkedin.com/in/you"
+                        className="w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)] focus:border-primary border-gray-200"
+                      />
+                      <ErrorMessage
+                        name="linkedin"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        Github Profile
+                      </label>
+                      <Field
+                        name="github"
+                        placeholder="https://github.com/you"
+                        className="w-full rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)] focus:border-primary border-gray-200"
+                      />
+                      <ErrorMessage
+                        name="github"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="bg-light-gray p-4 rounded-lg flex flex-col gap-2.5">
+                    <h3 className="text-sm font-semibold text-secondary mb-3">
+                      Application Details
+                    </h3>
+
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        How did you hear about us?
+                      </label>
+                      <div className="relative">
+                        <Field
+                          as="select"
+                          name="source"
+                          className="w-full rounded-full border px-4 py-2 pr-10 text-sm bg-white
+                      focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)]
+                      focus:border-primary border-gray-200 appearance-none"
+                        >
+                          <option
+                            className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
+                            value=""
+                          >
+                            Select...
+                          </option>
+                          {howDoYouKnew && howDoYouKnew.map((item) => (
+                            <option
+                            className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
+                            value={item?.personalHowNowAboutUsId}
+                          >
+                            {item?.personalHowNowAboutUsName}
+                          </option>
+                          ))}
+                        </Field>
+                        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
+                          <IoIosArrowDown />
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        Department{" "}
+                        <span className="ms-1 font-semibold">(required)</span>
+                      </label>
+                      <div className="relative">
+                        <Field
+                          as="select"
+                          name="department"
+                          className={`w-full rounded-full border px-4 py-2 pr-10 text-sm bg-white
+                        focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)]
+                        focus:border-primary appearance-none ${
+                          errors.department && touched.department
+                            ? "border-danger"
+                            : "border-gray-200"
+                        }`}
+                        >
+                          <option
+                            className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
+                            value=""
+                          >
+                            Select department
+                          </option>
+                          {departments &&
+                            departments.length > 0 &&
+                            departments.map((dept) => (
+                              <option
+                                className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
+                                value={dept.departmentId}
+                              >
+                                {dept?.departmentName}
+                              </option>
+                            ))}
+                        </Field>
+                        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
+                          <IoIosArrowDown />
+                        </span>
+                      </div>
+                      <ErrorMessage
+                        name="department"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        Position Applying For{" "}
+                        <span className="ms-1 font-semibold">(required)</span>
+                      </label>
+                      <div className="relative">
+                        <Field
+                          as="select"
+                          name="position"
+                          className={`w-full rounded-full border px-4 py-2 pr-10 text-sm bg-white
+                        focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)]
+                        focus:border-primary appearance-none ${
+                          errors.position && touched.position
+                            ? "border-danger"
+                            : "border-gray-200"
+                        }`}
+                        >
+                          <option
+                            className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
+                            value=""
+                          >
+                            Select position
+                          </option>
+                          {jobs &&
+                            jobs.length > 0 &&
+                            jobs.map((jop) => (
+                              <option
+                                className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
+                                value={jop.jopId}
+                              >
+                                {jop?.jopName}
+                              </option>
+                            ))}
+                        </Field>
+                        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
+                          <IoIosArrowDown />
+                        </span>
+                      </div>
+                      <ErrorMessage
+                        name="position"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
+                    </div>
+                  </div>
                 </div>
                 {/* </div> */}
               </section>
 
               {/* Contact & Job details */}
               <section className="mt-6 bg-light-gray rounded-xl p-4">
-
                 <div className="mb-3">
                   <label className="block text-secondary text-sm mb-1">
                     Cover Note / Additional Information
@@ -868,7 +1125,11 @@ export default function ApplyingForm() {
                     </h4>
                     <FieldArray name="experiences">
                       {({ push, remove }) => (
-                        <div className={`${values.experiences.length ==3 ? 'hidden' : ''} `}>
+                        <div
+                          className={`${
+                            values.experiences.length == 3 ? "hidden" : ""
+                          } `}
+                        >
                           <button
                             type="button"
                             onClick={() =>
@@ -895,17 +1156,15 @@ export default function ApplyingForm() {
                           values.experiences.map((exp, idx) => (
                             <div className="">
                               <div className="text-xs flex justify-between grid-cols-12 mt-5 mb-2">
-
                                 <h4 className="">Experience No {idx + 1}</h4>
                                 <button
-                                    type="button"
-                                    onClick={() => remove(idx)}
-                                    className="text-sm text-red-500 md:hidden"
-                                  >
-                                    <FaTrashAlt />
-                                  </button>
-                                
-                                </div>
+                                  type="button"
+                                  onClick={() => remove(idx)}
+                                  className="text-sm text-red-500 md:hidden"
+                                >
+                                  <FaTrashAlt />
+                                </button>
+                              </div>
                               <div
                                 key={idx}
                                 className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center "
@@ -923,7 +1182,7 @@ export default function ApplyingForm() {
                                   />
                                 </div>
 
-                                <div className="md:col-span-4">
+                                <div className="md:col-span-3">
                                   <Field
                                     name={`experiences.${idx}.role`}
                                     placeholder="Role / Title"
@@ -935,7 +1194,7 @@ export default function ApplyingForm() {
                                     className="text-danger text-xs mt-1 md:hidden"
                                   />
                                 </div>
-                                <div className="md:col-span-2">
+                                <div className="md:col-span-3">
                                   <Field
                                     name={`experiences.${idx}.years`}
                                     placeholder="Years of experience"
@@ -966,14 +1225,14 @@ export default function ApplyingForm() {
                                     className="text-danger text-xs mt-1 "
                                   />
                                 </div>
-                                <div className="col-span-4">
+                                <div className="col-span-3">
                                   <ErrorMessage
                                     name={`experiences.${idx}.role`}
                                     component="div"
                                     className="text-danger text-xs mt-1 "
                                   />
                                 </div>
-                                <div className="col-span-2">
+                                <div className="col-span-3">
                                   <ErrorMessage
                                     name={`experiences.${idx}.years`}
                                     component="div"
@@ -996,7 +1255,11 @@ export default function ApplyingForm() {
                     </h4>
                     <FieldArray name="education">
                       {({ push }) => (
-                        <div className={`${values.education.length ==3 ? 'hidden' : ''} `}>
+                        <div
+                          className={`${
+                            values.education.length == 3 ? "hidden" : ""
+                          } `}
+                        >
                           <button
                             type="button"
                             onClick={() =>
@@ -1022,19 +1285,16 @@ export default function ApplyingForm() {
                           values.education.length > 0 &&
                           values.education.map((edu, idx) => (
                             <div className="">
-                              
-                                <div className="text-xs flex justify-between grid-cols-12 mt-5 mb-2">
-
+                              <div className="text-xs flex justify-between grid-cols-12 mt-5 mb-2">
                                 <h4 className="">Education No {idx + 1}</h4>
                                 <button
-                                    type="button"
-                                    onClick={() => remove(idx)}
-                                    className="text-sm text-red-500 md:hidden"
-                                  >
-                                    <FaTrashAlt />
-                                  </button>
-                                
-                                </div>
+                                  type="button"
+                                  onClick={() => remove(idx)}
+                                  className="text-sm text-red-500 md:hidden"
+                                >
+                                  <FaTrashAlt />
+                                </button>
+                              </div>
                               <div
                                 key={idx}
                                 className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center"
@@ -1052,7 +1312,7 @@ export default function ApplyingForm() {
                                   />
                                 </div>
 
-                                <div className="md:col-span-4">
+                                <div className="md:col-span-3">
                                   <Field
                                     name={`education.${idx}.degree`}
                                     placeholder="Degree / Major"
@@ -1065,10 +1325,10 @@ export default function ApplyingForm() {
                                   />
                                 </div>
 
-                                <div className="md:col-span-2">
+                                <div className="md:col-span-3">
                                   <Field
                                     name={`education.${idx}.year`}
-                                    placeholder="Year"
+                                    placeholder="Graduation Year"
                                     className="w-full rounded-full border border-gray-200 px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none"
                                   />
                                   <ErrorMessage
@@ -1096,14 +1356,14 @@ export default function ApplyingForm() {
                                     className="text-danger text-xs mt-1 "
                                   />
                                 </div>
-                                <div className="col-span-4">
+                                <div className="col-span-3">
                                   <ErrorMessage
                                     name={`education.${idx}.degree`}
                                     component="div"
                                     className="text-danger text-xs mt-1 "
                                   />
                                 </div>
-                                <div className="col-span-2">
+                                <div className="col-span-3">
                                   <ErrorMessage
                                     name={`education.${idx}.year`}
                                     component="div"
@@ -1192,8 +1452,7 @@ export default function ApplyingForm() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="rounded-full px-5 py-2 text-white font-semibold"
-                  style={{ background: "var(--color-primary)" }}
+                  className={`rounded-full px-5 py-2 text-white font-semibold ${isSubmitting?"bg-[#B88E5299] pointer-events-none":"bg-primary"}`}
                 >
                   {isSubmitting ? "Submitting..." : "Submit Application"}
                 </button>
@@ -1226,6 +1485,14 @@ export default function ApplyingForm() {
                       {values.middleName ? values.middleName + " " : ""}
                       {values.lastName}
                     </li>
+                      <li>
+                      <strong className="text-secondary">Birth Date:</strong>{" "}
+                      {values.birthDate || "—"}
+                    </li>
+                      <li>
+                      <strong className="text-secondary">Gender:</strong>{" "}
+                      {values.gender ? genders.find((g) => g.personalGenderId == values.gender)?.personalGenderName : "—"}
+                    </li>
                     <li>
                       <strong className="text-secondary">Email:</strong>{" "}
                       {values.email || "—"}
@@ -1235,20 +1502,37 @@ export default function ApplyingForm() {
                       {values.phoneCode} {values.phone || "—"}
                     </li>
                     <li>
+                      <strong className="text-secondary">Second Phone:</strong>{" "}
+                      {values.secondPhoneCode} {values.secondPhone || "—"}
+                    </li>
+                    <li>
+                      <strong className="text-secondary">Linked in:</strong>{" "}
+                      {values.linkedin || "—"}
+                    </li>
+                    <li>
+                      <strong className="text-secondary">GitHub:</strong>{" "}
+                      {values.github || "—"}
+                    </li>
+
+
+                    <li>
                       <strong className="text-secondary">Location:</strong>{" "}
-                      {values.location?.country || "—"}
-                      {values.location?.city ? `, ${values.location.city}` : ""}
+                      {uniqueCountries.find(
+                        (c) => c.countryID == values.location?.country
+                      )?.countryName || "—"}
+                      {values.location?.city ? `, ${uniqueCities.find((c) => c.cityID == values.location?.city)?.cityName}` : ""}
                       {values.location?.area
-                        ? ` — ${values.location.area}`
+                        ? ` — ${uniqueAreas.find((a) => a.ariaID == values.location?.area)?.ariaName}`
                         : ""}
+                        {values.location?.address ? `, ${values.location?.address}` : ""}
                     </li>
                     <li>
                       <strong className="text-secondary">Department:</strong>{" "}
-                      {values.department || "—"}
+                      {values.department ? departments.find((d) => d.departmentId == values.department)?.departmentName : "—"}
                     </li>
                     <li>
                       <strong className="text-secondary">Position:</strong>{" "}
-                      {values.position || "—"}
+                      {values.position ? jobs.find((j) => j.jopId == values.position)?.jopName : "—"}
                     </li>
                     <li>
                       <strong className="text-secondary">CV:</strong>{" "}
@@ -1288,6 +1572,10 @@ export default function ApplyingForm() {
                           <li className="text-sm text-gray">—</li>
                         )}
                       </ul>
+                    </li>
+                    <li>
+                      <strong className="text-secondary">Cover Note / Additional Information:</strong>{" "}
+                      {values.cover || "—"}
                     </li>
                   </ul>
                 </div>
