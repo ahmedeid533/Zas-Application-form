@@ -4,7 +4,11 @@
   --color-secondary: #49494A;
   --color-gray: #6b6b6b;
   --color-light-gray: #f8fafd;
-  --color-danger: #ff4d4f
+  --color-danger: #ff4d4f;
+  --color-light-gray-100:#e6e6e6;
+  --color-secondary-100:#323131;
+
+
 
 
   
@@ -13,11 +17,27 @@ html, body {
 /* font-family: 'Inter', sans-serif;
     font-weight: 400; */
     scroll-behavior: smooth;
+    font-size:0.9rem;
+    color: #201F1F;
+    font-family: "Google Sans Flex", sans-serif;
+  }
+  *::selection{
+    background-color: var(--color-primary);
+    color: #fff;
   }
 
 .rtl{
   direction: rtl;
 }
+  .global-btn{
+    @apply  text-white py-1 px-8 rounded-full transition-all duration-300 ease-in-out uppercase border border-primary;
+  }
+  .btn-primary{
+    @apply bg-primary hover:bg-white hover:text-primary px-12;
+  }
+  .btn-secondary{
+    @apply bg-secondary hover:bg-primary;
+  }
 
 body::-webkit-scrollbar {
   width: 10px;

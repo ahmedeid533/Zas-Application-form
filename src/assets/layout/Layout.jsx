@@ -7,6 +7,13 @@ import Loading from "../../pages/loading/Loading";
 import ApplyingForm from "../../pages/ApplyingForm/ApplyingForm";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import Home from "../../pages/home/Home";
+import Catering from "../../pages/catering/Catering";
+import InflightMeal from "../../pages/inflightMeal/inflightMeal";
+import Contact from "../../pages/contact/Contact";
+import About from "../../pages/about/About";
+import PrivacyPolicy from "../../pages/privacyPolicy/privacyPolicy";
+import Terms from "../../pages/terms/Terms";
 
 function Main() {
 
@@ -71,16 +78,25 @@ function Layout() {
 //   return () => window.removeEventListener("resize", handleResize);
 // }, []);
 
-  const routes =[
+  const routes = [
     {
       path: "/",
-      element: <Main />,children: [
-        { index: true, element: <ApplyingForm/>},
-    {
-      path:"/job-application",
-      element:<ApplyingForm/>
-    }
-  ],}]
+      element: <Main />,
+      children: [
+        { index: true, element: <Home /> },
+        {path:"/private-jet-aircatering-cairo",element:<Catering/>},
+        {path:"/inflight-meal-catering-egypt",element:<InflightMeal/>},
+        {path:"/air-catering-cairo-contact",element:<Contact/>},
+        {path:"/about-us",element:<About/>},
+        {path:"/privacy-policy",element:<PrivacyPolicy/>},
+        {path:"/website-terms",element:<Terms/>},
+        // {
+        //   path:"/job-application",
+        //   element:<ApplyingForm/>
+        // }
+      ],
+    },
+  ];
   const handleRouterError = (error) => {
     console.error("Router encountered an error:", error);
     if (

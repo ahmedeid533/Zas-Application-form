@@ -1,13 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
+import { Formik, Form, Field, ErrorMessage, FieldArray, useFormikContext } from "formik";
 import * as Yup from "yup";
 import { FaTrashAlt } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
-import { GetDepartments, GetDepartment,GetGenders,GetLocations,GetJobs, GetCountries, GetHowDoYouKnow } from "../../assets/apis/applyingJob/ApplyingJobApi";
+import { GetDepartments, GetDepartment,GetGenders,GetLocations,GetJobs, GetCountries, GetHowDoYouKnow, GetSocials } from "../../assets/apis/applyingJob/ApplyingJobApi";
 import { useQuery } from "@tanstack/react-query";
 import { IoCheckmarkSharp } from "react-icons/io5";
 import { useScreenViewStore } from "../../assets/store/screenViewStore";
 import { uploadToCloudinary } from "../../cloudinary/cloudinary";
+import toast from "react-hot-toast";
 
 /**
  * ApplyingForm — React component (code/react)
@@ -114,6 +115,11 @@ export default function ApplyingForm() {
     queryFn: GetJobs,
   });
 
+    const { data: socials, isLoading: loadingSocials } = useQuery({
+    queryKey: ["socials"],
+    queryFn: GetSocials,
+  });
+
   const { data: genders, isLoading: loadingGenders } = useQuery({
     queryKey: ["genders"],
     queryFn: GetGenders,
@@ -129,9 +135,9 @@ export default function ApplyingForm() {
   });
 
   useEffect(() => {
-    console.log("howDoYouKnew",howDoYouKnew);
+    console.log("socials",socials);
     
-  }, [howDoYouKnew]);
+  }, [socials]);
 
   // validation
   const SUPPORTED_CV = [
@@ -155,9 +161,9 @@ export default function ApplyingForm() {
 
   const validationSchema = Yup.object().shape({
     firstName: Yup.string().trim().required("First name is required"),
-    middleName: Yup.string().trim(),
+    middleName: Yup.string().trim().required("Middle name is required"),
     lastName: Yup.string().trim().required("Last name is required"),
-    birthDate: Yup.date().nullable(),
+    birthDate: Yup.date().required("Birth date is required").max(new Date(), "Invalid date"),
     email: Yup.string().email("Invalid email").required("Email is required"),
     phoneCode: Yup.string().required("Code"),
     secondPhoneCode: Yup.string(),
@@ -174,8 +180,9 @@ export default function ApplyingForm() {
     source: Yup.string(),
     department: Yup.string().required("Department is required"),
     position: Yup.string().required("Position is required"),
+    socialStatus: Yup.string().required("Social status is required"),
     cover: Yup.string(),
-    gender: Yup.string(),
+    gender: Yup.string().required("Gender is required"),
     experiences: Yup.array().of(experienceSchema).min(0),
     education: Yup.array().of(educationSchema).min(0),
     photo: Yup.mixed()
@@ -204,6 +211,7 @@ export default function ApplyingForm() {
     secondPhoneCode: "+20",
     phone: "",
     secondPhone: "",
+    socialStatus:"",
     // location is now an object with 3 parts
     location: { country: "", city: "", area: "", address: "" },
     linkedin: "",
@@ -291,17 +299,39 @@ const uniqueAreas = useMemo(() => {
   );
 }, [countries, selectedCountry, selectedCity]);
 
+function SubmitWatcher() {
+  const { submitCount, errors } = useFormikContext();
+  const shownRef = useRef(0);
 
-// return (
-//   <div className="flex flex-col items-center justify-center gap-1 text-center" style={{
-//   height: `calc(100vh - ${navBarHeight + footerHeight}px)`
-// }}>
-//     <IoCheckmarkSharp className="text-[300px] text-green-500"/>
-//     <p className="text-3xl font-bold">Thank You!</p>
-//     <p className="sm:text-2xl text-xl">Your application was successfully submitted</p>
-//     <p className="text-xl text-gray-600">We will contact you soon</p>
-//   </div>
-// )
+  useEffect(() => {
+    // لو في محاولة إرسال وفي أخطاء، نعرض toast مرة وحدة لكل submitCount
+    if (submitCount > 0 && Object.keys(errors || {}).length > 0) {
+      if (shownRef.current !== submitCount) {
+        toast.error("Please fill all required fields correctly");
+        shownRef.current = submitCount;
+      }
+    }
+  }, [submitCount, errors]);
+
+  return null;
+}
+useEffect(()=>{
+  console.log("navBar :" , navBarHeight,"footer:",footerHeight);
+  
+},navBarHeight,footerHeight)
+
+
+
+if(apiSuccess) return (
+  <div className="flex flex-col items-center justify-center gap-1 text-center" style={{
+  height: `calc( 100vh - ${(navBarHeight + footerHeight)}px)`
+}}>
+    <IoCheckmarkSharp className="text-[300px] text-green-500"/>
+    <p className="text-3xl font-bold">Thank You!</p>
+    <p className="sm:text-2xl text-xl">Your application was successfully submitted</p>
+    <p className="text-xl text-gray-600">We will contact you soon</p>
+  </div>
+)
 
   return (
     <div className="min-h-screen flex items-start justify-center p-6 bg-gradient-to-b from-white to-gray-50">
@@ -328,16 +358,19 @@ const uniqueAreas = useMemo(() => {
   },
   body: JSON.stringify({
     personalId: 0,
-    personalName: `${values.firstName} ${values.middleName} ${values.lastName}`,
+    // personalName: `${values.firstName} ${values.middleName} ${values.lastName}`,
+    PersonalCvFirstName : values.firstName,
+    PersonalCvMedilName  : values.middleName,
+    PersonalCvLastName : values.lastName,
     personalDepartmentId: Number(values.department),
     personalJopId: Number(values.position),
-    // personalSocialId: 0,
     personalBerthDate: values.birthDate,
     personalMoble: `${values.secondPhoneCode} ${values.secondPhone}`,
     personalPhone: `${values.phoneCode} ${values.phone}`,
     personalMail: values.email,
     personalCountryId: Number(values.location.country),
     personalCityId: Number(values.location.city),
+    // personalCityName: uniqueCities.find(item => item.cityID === Number(values.location.city))?.cityName,
     personalCityAreaId: Number(values.location.area),
     personalStreet: values.location.address,
     personalGenderId: Number(values.gender),
@@ -345,6 +378,7 @@ const uniqueAreas = useMemo(() => {
     personalCvGithubProfile: values.github,
     personalCvCoverNote: values.cover,
     personalCvHowNowAboutUsId: Number(values.source),
+    personalSocialId: Number(values.socialStatus),
     personalCvUploadPickt:personalImage,
     personalCvUploadCV: cv,
     personalCvsWorkExperiences: values.experiences?.map(e => ({
@@ -365,10 +399,7 @@ const uniqueAreas = useMemo(() => {
 
               if (res.ok) {
                 // show thank you message
-                setApiSuccess(
-                  (data && data.message) ||
-                    "Thank you — your application was submitted successfully."
-                );
+                setApiSuccess(true);
 
                 // store submitted summary metadata (files replaced with lightweight metadata)
                 const summary = { ...values };
@@ -388,9 +419,11 @@ const uniqueAreas = useMemo(() => {
                   (data && data.message) ||
                     `Submission failed (status ${res.status})`
                 );
+                toast.error("something went wrong");
               }
             } catch (err) {
               setApiError(err.message || "Network error");
+              toast.error("something went wrong");
             } finally {
               actions.setSubmitting(false);
             }
@@ -404,7 +437,9 @@ const uniqueAreas = useMemo(() => {
             touched,
             resetForm,
           }) => (
-            <Form className="bg-white border rounded-2xl p-6 shadow-sm border-light-gray">
+            <>
+            <SubmitWatcher/>
+            <Form className="bg-white border rounded-2xl py-6 md:px-6 px-2 shadow-sm border-light-gray">
               <h2 className="text-xl font-semibold text-secondary">
                 Job Application
               </h2>
@@ -413,7 +448,7 @@ const uniqueAreas = useMemo(() => {
               </p>
 
               {/* show API messages */}
-              {apiError && (
+              {/* {apiError && (
                 <div className="mt-4 p-3 rounded-md bg-rose-50 text-danger border border-rose-100">
                   {apiError}
                 </div>
@@ -423,7 +458,7 @@ const uniqueAreas = useMemo(() => {
                 <div className="mt-4 p-3 rounded-md bg-green-50 text-green-700 border border-green-100">
                   {apiSuccess}
                 </div>
-              )}
+              )} */}
 
               {/* Personal Data card */}
               <section className="mt-6  rounded-xl">
@@ -435,7 +470,7 @@ const uniqueAreas = useMemo(() => {
                     <div>
                       <label className="block text-secondary text-sm mb-1">
                         First Name{" "}
-                        <span className="ms-1 font-semibold">(required)</span>
+                        <span className="ms-1 font-semibold text-danger">(required)</span>
                       </label>
                       <Field
                         name="firstName"
@@ -456,6 +491,7 @@ const uniqueAreas = useMemo(() => {
                     <div>
                       <label className="block text-secondary text-sm mb-1">
                         Middle Name
+                        <span className="ms-1 font-semibold text-danger">(required)</span>
                       </label>
                       <Field
                         name="middleName"
@@ -475,7 +511,7 @@ const uniqueAreas = useMemo(() => {
                     <div>
                       <label className="block text-secondary text-sm mb-1">
                         Last Name{" "}
-                        <span className="ms-1 font-semibold">(required)</span>
+                        <span className="ms-1 font-semibold text-danger">(required)</span>
                       </label>
                       <Field
                         name="lastName"
@@ -495,6 +531,7 @@ const uniqueAreas = useMemo(() => {
                     <div>
                       <label className="block text-secondary text-sm mb-1">
                         Birth Date
+                        <span className="ms-1 font-semibold text-danger">(required)</span>
                       </label>
                       <div className="relative">
                         <Field
@@ -577,14 +614,17 @@ const uniqueAreas = useMemo(() => {
                     <div>
                       <label className="block text-secondary text-sm mb-1">
                         Gender
+                        <span className="ms-1 font-semibold text-danger">(required)</span>
                       </label>
                       <div className="relative">
                         <Field
                           as="select"
                           name="gender"
-                          className="w-full rounded-full border px-4 py-2 pr-10 text-sm bg-white
-                      focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)]
-                      focus:border-primary border-gray-200 appearance-none"
+                          className={`w-full appearance-none rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)] focus:border-primary ${
+                          errors.gender && touched.gender
+                            ? "border-danger"
+                            : "border-gray-200"
+                        }`}
                         >
                           <option value="">Select Gender</option>
                           {genders &&
@@ -602,6 +642,49 @@ const uniqueAreas = useMemo(() => {
                           <IoIosArrowDown />
                         </span>
                       </div>
+                      <ErrorMessage
+                        name="gender"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-secondary text-sm mb-1">
+                        Social status
+                        <span className="ms-1 font-semibold text-danger">(required)</span>
+                      </label>
+                      <div className="relative">
+                        <Field
+                          as="select"
+                          name="socialStatus"
+                          className={`w-full appearance-none rounded-full border px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgba(184,142,82,0.06)] focus:border-primary ${
+                          errors.socialStatus && touched.socialStatus
+                            ? "border-danger"
+                            : "border-gray-200"
+                        }`}
+                        >
+                          <option value="">Select Social Status</option>
+                          {socials &&
+                            socials.length > 0 &&
+                            socials.map((social) => (
+                              <option
+                                className="checked:bg-primary checked:text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white active:bg-primary active:text-white"
+                                value={social.personalSocialId}
+                              >
+                                {social?.personalSocialName}
+                              </option>
+                            ))}
+                        </Field>
+                        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
+                          <IoIosArrowDown />
+                        </span>
+                      </div>
+                      <ErrorMessage
+                        name="socialStatus"
+                        component="div"
+                        className="text-danger text-xs mt-1"
+                      />
                     </div>
 
                     <div>
@@ -673,7 +756,7 @@ const uniqueAreas = useMemo(() => {
                     <div>
                       <label className="block text-secondary text-sm mb-1">
                         Country{" "}
-                        <span className="ms-1 font-semibold">(required)</span>
+                        <span className="ms-1 font-semibold text-danger">(required)</span>
                       </label>
                       <div className="relative">
                         <Field
@@ -717,8 +800,8 @@ const uniqueAreas = useMemo(() => {
 
                     <div>
                       <label className="block text-secondary text-sm mb-1">
-                        city{" "}
-                        <span className="ms-1 font-semibold">(required)</span>
+                        City{" "}
+                        <span className="ms-1 font-semibold text-danger">(required)</span>
                       </label>
                       <div className="relative">
                         <Field
@@ -766,7 +849,7 @@ const uniqueAreas = useMemo(() => {
                     <div>
                       <label className="block text-secondary text-sm mb-1">
                         Area / District{" "}
-                        <span className="ms-1 font-semibold">(required)</span>
+                        <span className="ms-1 font-semibold text-danger">(required)</span>
                       </label>
                       <div className="relative">
                         <Field
@@ -811,7 +894,7 @@ const uniqueAreas = useMemo(() => {
                     <div>
                       <label className="block text-secondary text-sm mb-1">
                         Address{" "}
-                        <span className="ms-1 font-semibold">(required)</span>
+                        <span className="ms-1 font-semibold text-danger">(required)</span>
                       </label>
                       <Field
                         name="location.address"
@@ -837,7 +920,7 @@ const uniqueAreas = useMemo(() => {
                     <div>
                       <label className="block text-secondary text-sm mb-1">
                         Email{" "}
-                        <span className="ms-1 font-semibold">(required)</span>
+                        <span className="ms-1 font-semibold text-danger">(required)</span>
                       </label>
                       <Field
                         name="email"
@@ -859,7 +942,7 @@ const uniqueAreas = useMemo(() => {
                     <div>
                       <label className="block text-secondary text-sm mb-1">
                         Phone{" "}
-                        <span className="ms-1 font-semibold">(required)</span>
+                        <span className="ms-1 font-semibold text-danger">(required)</span>
                       </label>
                       <div
                         className={`flex items-center w-full rounded-full border bg-white overflow-hidden
@@ -878,7 +961,7 @@ const uniqueAreas = useMemo(() => {
                               key={c.code}
                               value={c.code}
                             >
-                              <span>{c.label}</span>
+                              {window.innerWidth >500 && <span>{c.label}</span>}
                               <span>{c.code}</span>
                             </option>
                           ))}
@@ -919,7 +1002,7 @@ const uniqueAreas = useMemo(() => {
                               key={c.code}
                               value={c.code}
                             >
-                              <span>{c.label}</span>
+{window.innerWidth > 500 && <span>{c.label}</span>}
                               <span>{c.code}</span>
                             </option>
                           ))}
@@ -1012,7 +1095,7 @@ const uniqueAreas = useMemo(() => {
                     <div>
                       <label className="block text-secondary text-sm mb-1">
                         Department{" "}
-                        <span className="ms-1 font-semibold">(required)</span>
+                        <span className="ms-1 font-semibold text-danger">(required)</span>
                       </label>
                       <div className="relative">
                         <Field
@@ -1056,7 +1139,7 @@ const uniqueAreas = useMemo(() => {
                     <div>
                       <label className="block text-secondary text-sm mb-1">
                         Position Applying For{" "}
-                        <span className="ms-1 font-semibold">(required)</span>
+                        <span className="ms-1 font-semibold text-danger">(required)</span>
                       </label>
                       <div className="relative">
                         <Field
@@ -1382,7 +1465,7 @@ const uniqueAreas = useMemo(() => {
                 <div className="mt-2">
                   <label className="block text-secondary text-sm mb-1">
                     Upload CV{" "}
-                    <span className="ms-1 font-semibold">(required)</span>
+                    <span className="ms-1 font-semibold text-danger">(required)</span>
                   </label>
 
                   <div
@@ -1448,7 +1531,7 @@ const uniqueAreas = useMemo(() => {
               </section>
 
               {/* Actions */}
-              <div className="mt-6 flex gap-3">
+              <div className="mt-6 flex flex-col sm:flex-row gap-3">
                 <button
                   type="submit"
                   disabled={isSubmitting}
@@ -1466,7 +1549,7 @@ const uniqueAreas = useMemo(() => {
                     resetForm();
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
-                  className="rounded-full px-5 py-2 border"
+                  className="rounded-full px-5 py-2 border "
                 >
                   Reset
                 </button>
@@ -1581,6 +1664,7 @@ const uniqueAreas = useMemo(() => {
                 </div>
               </div>
             </Form>
+            </>
           )}
         </Formik>
       </div>
@@ -1915,7 +1999,7 @@ const uniqueAreas = useMemo(() => {
 //                   <div>
 //                     <label className="block text-secondary text-sm mb-1">
 //                       First Name{" "}
-//                       <span className="ms-1 font-semibold">(required)</span>
+//                       <span className="ms-1 font-semibold text-danger">(required)</span>
 //                     </label>
 //                     <Field
 //                       name="firstName"
@@ -1959,7 +2043,7 @@ const uniqueAreas = useMemo(() => {
 //                   <div>
 //                     <label className="block text-secondary text-sm mb-1">
 //                       Last Name{" "}
-//                       <span className="ms-1 font-semibold">(required)</span>
+//                       <span className="ms-1 font-semibold text-danger">(required)</span>
 //                     </label>
 //                     <Field
 //                       name="lastName"
@@ -2143,7 +2227,7 @@ const uniqueAreas = useMemo(() => {
 //                   <div>
 //                     <label className="block text-secondary text-sm mb-1">
 //                       Email{" "}
-//                       <span className="ms-1 font-semibold">(required)</span>
+//                       <span className="ms-1 font-semibold text-danger">(required)</span>
 //                     </label>
 //                     <Field
 //                       name="email"
@@ -2165,7 +2249,7 @@ const uniqueAreas = useMemo(() => {
 //                   <div>
 //                     <label className="block text-secondary text-sm mb-1">
 //                       Phone{" "}
-//                       <span className="ms-1 font-semibold">(required)</span>
+//                       <span className="ms-1 font-semibold text-danger">(required)</span>
 //                     </label>
 //                     <div
 //                       className={`flex items-center w-full rounded-full border bg-white overflow-hidden
@@ -2208,7 +2292,7 @@ const uniqueAreas = useMemo(() => {
 //                   <div>
 //                     <label className="block text-secondary text-sm mb-1">
 //                       Country{" "}
-//                       <span className="ms-1 font-semibold">(required)</span>
+//                       <span className="ms-1 font-semibold text-danger">(required)</span>
 //                     </label>
 //                     <div className="relative">
 
@@ -2243,7 +2327,7 @@ const uniqueAreas = useMemo(() => {
 
 //                   <div>
 //                     <label className="block text-secondary text-sm mb-1">
-//                       City<span className="ms-1 font-semibold">(required)</span>
+//                       City<span className="ms-1 font-semibold text-danger">(required)</span>
 //                     </label>
 //                     <Field
 //                       name="location.city"
@@ -2265,7 +2349,7 @@ const uniqueAreas = useMemo(() => {
 //                   <div>
 //                     <label className="block text-secondary text-sm mb-1">
 //                       Area / District
-//                       <span className="ms-1 font-semibold">(required)</span>
+//                       <span className="ms-1 font-semibold text-danger">(required)</span>
 //                     </label>
 //                     <Field
 //                       name="location.area"
@@ -2362,7 +2446,7 @@ const uniqueAreas = useMemo(() => {
 //                   <div>
 //                     <label className="block text-secondary text-sm mb-1">
 //                       Department{" "}
-//                       <span className="ms-1 font-semibold">(required)</span>
+//                       <span className="ms-1 font-semibold text-danger">(required)</span>
 //                     </label>
 //                     <div className="relative">
 
@@ -2398,7 +2482,7 @@ const uniqueAreas = useMemo(() => {
 //                   <div>
 //                     <label className="block text-secondary text-sm mb-1">
 //                       Position Applying For{" "}
-//                       <span className="ms-1 font-semibold">(required)</span>
+//                       <span className="ms-1 font-semibold text-danger">(required)</span>
 //                     </label>
 //                     <Field
 //                       name="position"
@@ -2667,7 +2751,7 @@ const uniqueAreas = useMemo(() => {
 //                 <div className="mt-2">
 //                   <label className="block text-secondary text-sm mb-1">
 //                     Upload CV{" "}
-//                     <span className="ms-1 font-semibold">(required)</span>
+//                     <span className="ms-1 font-semibold text-danger">(required)</span>
 //                   </label>
 
 //                   <div

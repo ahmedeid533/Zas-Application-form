@@ -137,3 +137,16 @@ export function GetHowDoYouKnow() {
       throw error;
     });
 }
+
+export function GetSocials() {
+  return axiosInstance
+    .get("/api/CV/CVGeneralSelection/PersonalSocial")
+    .then((response) => {
+      //console.log(response);
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error fetching departments:", error);
+      throw error;
+    });
+}
