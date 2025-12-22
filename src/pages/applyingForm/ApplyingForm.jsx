@@ -334,7 +334,7 @@ if(apiSuccess) return (
 )
 
   return (
-    <div className="min-h-screen flex items-start justify-center p-6 bg-gradient-to-b from-white to-gray-50">
+    <div className="min-h-screen flex items-start justify-center p-6 bg-gradient-to-b from-white to-gray-50 pt-26">
       <div className="w-full max-w-5xl">
         <Formik
           initialValues={initialValues}

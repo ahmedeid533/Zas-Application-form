@@ -125,8 +125,20 @@ useEffect(() => {
 `} onClick={()=>{navigate("/air-catering-cairo-contact")}}>
    CONTACT
 </a>
-<button className="global-btn btn-secondary">login</button>
-<button className="global-btn btn-primary">food menu</button>
+<a className={`
+  relative text-white ${isScrolled&&"text-sm"}
+  after:content-['']
+  after:absolute after:-bottom-1 after:left-0
+  after:w-full after:h-0.5 after:bg-primary
+  after:scale-x-0 after:origin-right
+  after:transition-transform after:duration-300
+  hover:after:scale-x-100 hover:after:origin-left
+  transition-colors  hover:text-primary cursor-pointer
+`} onClick={()=>{navigate("/job-application")}}>
+   JOIN US
+</a>
+<button className="global-btn btn-secondary" onClick={()=>{navigate("/login")}}>login</button>
+<button className="global-btn btn-primary" onClick={()=>{navigate("/menu")}}>food menu</button>
         </div>
           </div>
           </div>

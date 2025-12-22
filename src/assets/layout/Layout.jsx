@@ -14,6 +14,8 @@ import Contact from "../../pages/contact/Contact";
 import About from "../../pages/about/About";
 import PrivacyPolicy from "../../pages/privacyPolicy/privacyPolicy";
 import Terms from "../../pages/terms/Terms";
+import Menu from "../../pages/menu/Menu";
+import Request from "../../pages/request/Request";
 
 function Main() {
 
@@ -90,12 +92,14 @@ function Layout() {
         {path:"/about-us",element:<About/>},
         {path:"/privacy-policy",element:<PrivacyPolicy/>},
         {path:"/website-terms",element:<Terms/>},
-        // {
-        //   path:"/job-application",
-        //   element:<ApplyingForm/>
-        // }
-      ],
-    },
+        {path:"/request",element:<Request/>},
+        {
+            path:"/job-application",
+            element:<ApplyingForm/>
+          }
+        ],
+      },
+      {path:"/menu",element:<Menu/>},
   ];
   const handleRouterError = (error) => {
     console.error("Router encountered an error:", error);
