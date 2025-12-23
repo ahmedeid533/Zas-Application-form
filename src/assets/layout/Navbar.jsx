@@ -151,12 +151,12 @@ useEffect(() => {
               </div>
               <a className={`
   text-white text-xl hover:text-primary cursor-pointer duration-200
-`}>
+`} onClick={()=>{navigate("/");setIsMenuOpen(false)}}>
   HOME
 </a>
 <a className={`  text-white text-xl hover:text-primary cursor-pointer duration-200
 
-`}>
+`} onClick={()=>{navigate("/private-jet-aircatering-cairo");setIsMenuOpen(false)}}>
    CATERING
 </a><a className={`
     text-white text-xl hover:text-primary cursor-pointer duration-200
@@ -166,13 +166,26 @@ useEffect(() => {
 </a><a className={`
     text-white text-xl hover:text-primary cursor-pointer duration-200
 
-`}>
+`} onClick={()=>{navigate("/inflight-meal-catering-egypt");setIsMenuOpen(false)}}>
    IN-FLIGHT MEALS
 </a><a className={`
     text-white text-xl hover:text-primary cursor-pointer duration-200
 
-`}>
+`} onClick={() => {
+    navigate("/");
+    setIsMenuOpen(false);
+    setTimeout(() => {
+      const el = document.getElementById("work");
+      el?.scrollIntoView( { behavior: "smooth"});
+    }, 100);
+  }}>
    CONTACT
+</a>
+<a className={`
+    text-white text-xl hover:text-primary cursor-pointer duration-200
+
+`} onClick={()=>{navigate("/job-application");setIsMenuOpen(false)}}>
+   JOIN US
 </a>
 <button className="global-btn btn-secondary">login</button>
 <button className="global-btn btn-primary">food menu</button>
