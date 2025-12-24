@@ -1,6 +1,9 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { motion } from "motion/react"
 function Home() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  })
   return (
     <div className="">
       {/* hero */}

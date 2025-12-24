@@ -188,7 +188,7 @@ useEffect(() => {
    JOIN US
 </a>
 <button className="global-btn btn-secondary">login</button>
-<button className="global-btn btn-primary">food menu</button>
+<button className="global-btn btn-primary" onClick={()=>{navigate("/menu");setIsMenuOpen(false)}}>food menu</button>
             </div>
           </div>
           </div>

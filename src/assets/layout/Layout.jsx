@@ -4,7 +4,7 @@ import { lazy, Suspense, useEffect } from "react";
 // import Footer from "./Footer";
 // import Home from "../../pages/home/Home";
 import Loading from "../../pages/loading/Loading";
-import ApplyingForm from "../../pages/ApplyingForm/ApplyingForm";
+// import ApplyingForm from "../../pages/ApplyingForm/ApplyingForm";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import Home from "../../pages/home/Home";
@@ -16,6 +16,7 @@ import PrivacyPolicy from "../../pages/privacyPolicy/privacyPolicy";
 import Terms from "../../pages/terms/Terms";
 import Menu from "../../pages/menu/Menu";
 import Request from "../../pages/request/Request";
+import ApplyingFormMultiFormik from "../../pages/ApplyingForm/ApplyingForm";
 
 function Main() {
 
@@ -95,7 +96,7 @@ function Layout() {
         {path:"/request",element:<Request/>},
         {
             path:"/job-application",
-            element:<ApplyingForm/>
+            element:<ApplyingFormMultiFormik/>
           }
         ],
       },

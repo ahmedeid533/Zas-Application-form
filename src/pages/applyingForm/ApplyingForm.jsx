@@ -1,3 +1,232 @@
+
+
+
+
+
+// // ApplyingFormMultiFormik.jsx  (replace the big single Formik with this file)
+// import React, { useState } from "react";
+// // import StepPersonal from "./StepPersonal";
+// // import StepContact from "./StepContact";
+// // import StepJobDetails from "./StepJobDetails";
+// // import StepReview from "./StepReview";
+// import toast from "react-hot-toast";
+// import StepPersonal from "./StepPersonal";
+// import StepContact from "./StepContact";
+// import StepJobDetails from "./StepJobDetails";
+// import StepReview from "./StepReview";
+
+// export default function ApplyingFormMultiFormik(props) {
+//   // reuse your existing initialValues from file
+//   const initialValues = {
+//     firstName: "",
+//     middleName: "",
+//     lastName: "",
+//     birthDate: "",
+//     email: "",
+//     phoneCode: "+20",
+//     secondPhoneCode: "+20",
+//     phone: "",
+//     secondPhone: "",
+//     socialStatus: "",
+//     location: { country: "", city: "", area: "", address: "" },
+//     linkedin: "",
+//     github: "",
+//     source: "",
+//     department: "",
+//     position: "",
+//     cover: "",
+//     photo: null,
+//     cv: null,
+//     gender: "",
+//     experiences: [],
+//     education: []
+//   };
+
+//   const [currentStep, setCurrentStep] = useState(0);
+//   const [formData, setFormData] = useState(initialValues);
+//   const steps = ["Personal", "Contact & Address", "Job Details", "Review & Submit"];
+
+//   const next = (stepValues) => {
+//     // merge partial step values into global formData
+//     setFormData((prev) => ({ ...prev, ...stepValues }));
+//     setCurrentStep((s) => s + 1);
+//   };
+
+//   const back = (partialFromStep) => {
+//     if (partialFromStep) setFormData((prev) => ({ ...prev, ...partialFromStep }));
+//     setCurrentStep((s) => Math.max(0, s - 1));
+//   };
+
+//   const submitAll = async (finalStepValues) => {
+//     // merge final step values first
+//     const values = { ...formData, ...finalStepValues };
+
+//     try {
+//       // Upload files (photo, cv, certificates) as you did before
+//       const personalImage = values.photo ? await uploadToCloudinary(values.photo) : "";
+//       const cvUpload = values.cv ? await uploadToCloudinary(values.cv) : "";
+
+//       // education certificates (if any) — preserve ordering
+//       const certificates = await Promise.all(
+//         (values.education || []).map((edu) =>
+//           edu.certificate ? uploadToCloudinary(edu.certificate) : ""
+//         )
+//       );
+
+//       // build payload (adapt to your API shape)
+//       const payload = {
+//         personalId: 0,
+//         PersonalCvFirstName: values.firstName,
+//         PersonalCvMedilName: values.middleName,
+//         PersonalCvLastName: values.lastName,
+//         personalDepartmentId: Number(values.department || 0),
+//         personalJopId: Number(values.position || 0),
+//         personalBerthDate: values.birthDate,
+//         personalMoble: `${values.secondPhoneCode} ${values.secondPhone}`,
+//         personalPhone: `${values.phoneCode} ${values.phone}`,
+//         personalMail: values.email,
+//         personalCountryId: Number(values.location.country || 0),
+//         personalCityId: Number(values.location.city || 0),
+//         personalCityAreaId: Number(values.location.area || 0),
+//         personalStreet: values.location.address,
+//         personalGenderId: Number(values.gender || 0),
+//         personalCvLinkedInProfile: values.linkedin,
+//         personalCvGithubProfile: values.github,
+//         personalCvCoverNote: values.cover,
+//         personalCvHowNowAboutUsId: Number(values.source || 0),
+//         personalSocialId: Number(values.socialStatus || 0),
+//         personalCvUploadPickt: personalImage,
+//         personalCvUploadCV: cvUpload,
+//         personalCvsWorkExperiences:
+//           (values.experiences || []).map((e) => ({
+//             personalCvsWorkExperienceCompanyName: e.company,
+//             personalCvsWorkExperienceRole: e.role,
+//             personalCvsWorkExperienceYear: Number(e.years || 0)
+//           })) || [],
+//         peronalCvsEducations:
+//           (values.education || []).map((e, i) => ({
+//             peronalCvEducationInstitution: e.institution,
+//             peronalCvEducationDegree: Number(e.degree || 0),
+//             peronalCvEducationGraduationYear: Number(e.year || 0),
+//             PeronalCvEducationFileLink: certificates[i] || ""
+//           })) || []
+//       };
+
+//       const res = await fetch(API_URL, {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json", Accept: "*/*" },
+//         body: JSON.stringify(payload)
+//       });
+
+//       if (!res.ok) {
+//         const data = await res.json().catch(() => null);
+//         throw new Error((data && data.message) || `Submission failed (status ${res.status})`);
+//       }
+
+//       toast.success("Application submitted!");
+//       setFormData(initialValues);
+//       setCurrentStep(0);
+//     } catch (err) {
+//       toast.error(err.message || "Submission failed");
+//       console.error(err);
+//     }
+//   };
+
+//   return (
+//     <div>
+//       <div className="steps-indicator">{/* your tabs/buttons – use currentStep */}</div>
+
+//       {currentStep === 0 && (
+//         <StepPersonal initialValues={formData} onNext={next} />
+//       )}
+
+//       {currentStep === 1 && (
+//         <StepContact initialValues={formData} onNext={next} onBack={back} />
+//       )}
+
+//       {currentStep === 2 && (
+//         <StepJobDetails initialValues={formData} onNext={next} onBack={back} />
+//       )}
+
+//       {currentStep === 3 && (
+//         <StepReview initialValues={formData} onBack={back} onSubmit={submitAll} />
+//       )}
+//     </div>
+//   );
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ApplyingForm.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Formik, Form, Field, ErrorMessage, FieldArray, useFormikContext } from "formik";
@@ -10,6 +239,7 @@ import { IoCheckmarkSharp } from "react-icons/io5";
 import { useScreenViewStore } from "../../assets/store/screenViewStore";
 import { uploadToCloudinary } from "../../cloudinary/cloudinary";
 import toast from "react-hot-toast";
+import { nanoid } from "nanoid";
 
 /**
  * Updated ApplyingForm.jsx
@@ -19,7 +249,9 @@ import toast from "react-hot-toast";
  * - CV remains optional
  */
 
-const API_URL = "https://apitest.skyculinaire.com/api/CV/CVTransaction/NewEmployee";
+const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const API_URL = `${VITE_API_BASE_URL}/api/CV/CVTransaction/NewEmployee`;
 
 const COUNTRY_CODES = [
   { code: "+1", label: "US / Canada" },
@@ -71,6 +303,7 @@ export default function ApplyingForm() {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
   const [selectedArea, setSelectedArea] = useState(null);
+  const [gapPopup, setGapPopup] = useState(false);
 
   const { data: departments } = useQuery({ queryKey: ["departments"], queryFn: GetDepartments });
   const { data: jobs } = useQuery({ queryKey: ["jobs"], queryFn: GetJobs });
@@ -78,6 +311,10 @@ export default function ApplyingForm() {
   const { data: genders } = useQuery({ queryKey: ["genders"], queryFn: GetGenders });
   const { data: countries } = useQuery({ queryKey: ["countries"], queryFn: GetCountries });
   const { data: howDoYouKnew } = useQuery({ queryKey: ["howDoYouKnew"], queryFn: GetHowDoYouKnow });
+
+   useEffect(() => {
+    window.scrollTo(0, 0);
+  })
 
   const getUniqueItems = (data, key) => {
     const arr = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
@@ -114,6 +351,9 @@ export default function ApplyingForm() {
     institution: Yup.string().trim().required("Institution is required"),
     degree: Yup.string().trim().required("Degree is required"),
     year: Yup.number().typeError("Must be a year").min(1900, "Invalid year").max(new Date().getFullYear(), "Invalid year").required("Year required"),
+    certificate:Yup.mixed()
+      .required("Certificate is required")
+      
   });
 
   const validationSchema = Yup.object().shape({
@@ -126,7 +366,7 @@ birthDate: Yup.date()
     email: Yup.string().email("Invalid email").required("Email is required"),
     phoneCode: Yup.string().required("Code"),
     secondPhoneCode: Yup.string(),
-    phone: Yup.string().trim().required("Phone is required").min(5, "Invalid phone"),
+    phone: Yup.string().trim().required("Phone is required").matches(/^[0-9]{7,15}$/, "Invalid phone"),
     secondPhone: Yup.string().trim().min(5, "Invalid phone"),
     location: Yup.object().shape({
       country: Yup.string().required("Country is required"),
@@ -173,7 +413,7 @@ birthDate: Yup.date()
     phone: "",
     secondPhone: "",
     socialStatus: "",
-    location: { country: "", city: "", area: "", address: "" },
+    location: { country: "", city: "", area: "", address: ""},
     linkedin: "",
     github: "",
     source: "",
@@ -229,36 +469,36 @@ birthDate: Yup.date()
   };
 
   // Handle clicking on a top tab: allow only backward always; forward only if previous steps valid
-  const handleStepClick = async (targetIndex, validateForm, values, setTouched) => {
-    if (targetIndex <= currentStep) {
-      setCurrentStep(targetIndex);
-      return;
-    }
-    const errors = await validateForm();
-    const requiredPaths = stepFields.slice(0, targetIndex).flat();
-    const stepHasErrors = requiredPaths.some(path => hasErrorForPath(errors, path));
-    if (stepHasErrors) {
-      // mark touched for previous required fields so errors show
-      const touchedObj = {};
-      requiredPaths.forEach((path) => {
-        const parts = path.split(".");
-        let cur = touchedObj;
-        for (let i = 0; i < parts.length; i++) {
-          const p = parts[i];
-          if (i === parts.length - 1) {
-            cur[p] = true;
-          } else {
-            cur[p] = cur[p] || {};
-            cur = cur[p];
-          }
-        }
-      });
-      setTouched((prev) => ({ ...prev, ...touchedObj }));
-      toast.error("Please complete required fields in previous steps before going forward.");
-      return;
-    }
-    setCurrentStep(targetIndex);
-  };
+  // const handleStepClick = async (targetIndex, validateForm, values, setTouched) => {
+  //   if (targetIndex <= currentStep) {
+  //     setCurrentStep(targetIndex);
+  //     return;
+  //   }
+  //   const errors = await validateForm();
+  //   const requiredPaths = stepFields.slice(0, targetIndex).flat();
+  //   const stepHasErrors = requiredPaths.some(path => hasErrorForPath(errors, path));
+  //   if (stepHasErrors) {
+  //     // mark touched for previous required fields so errors show
+  //     const touchedObj = {};
+  //     requiredPaths.forEach((path) => {
+  //       const parts = path.split(".");
+  //       let cur = touchedObj;
+  //       for (let i = 0; i < parts.length; i++) {
+  //         const p = parts[i];
+  //         if (i === parts.length - 1) {
+  //           cur[p] = true;
+  //         } else {
+  //           cur[p] = cur[p] || {};
+  //           cur = cur[p];
+  //         }
+  //       }
+  //     });
+  //     setTouched((prev) => ({ ...prev, ...touchedObj }));
+  //     toast.error("Please complete required fields in previous steps before going forward.");
+  //     return;
+  //   }
+  //   setCurrentStep(targetIndex);
+  // };
 
   // **Autofill from CV** — improved, tolerant regexes and heuristics
 const handleAutofillFromCV = async (file, setFieldValue) => {
@@ -501,41 +741,171 @@ const handleAutofillFromCV = async (file, setFieldValue) => {
 };
 
   // helper to check per-step errors and mark touched for current step
-  const validateStepAndProceed = async (validateForm, values, setTouched) => {
-    const errors = await validateForm();
-    const fields = stepFields[currentStep] || [];
-    const stepHasErrors = fields.some((path) => {
+  // const validateStepAndProceed = async (validateForm, values, setTouched) => {
+  //   const errors = await validateForm();
+  //   const fields = stepFields[currentStep] || [];
+  //   const stepHasErrors = fields.some((path) => {
+  //     const parts = path.split(".");
+  //     let v = errors;
+  //     for (const p of parts) {
+  //       if (!v) return false;
+  //       v = v[p];
+  //     }
+  //     return !!v;
+  //   });
+
+  //   if (stepHasErrors) {
+  //     // mark the step fields as touched to show validation messages
+  //     const touchedObj = {};
+  //     fields.forEach((path) => {
+  //       const parts = path.split(".");
+  //       let cur = touchedObj;
+  //       for (let i = 0; i < parts.length; i++) {
+  //         const p = parts[i];
+  //         if (i === parts.length - 1) {
+  //           cur[p] = true;
+  //         } else {
+  //           cur[p] = cur[p] || {};
+  //           cur = cur[p];
+  //         }
+  //       }
+  //     });
+  //     setTouched((prev) => ({ ...prev, ...touchedObj }));
+  //     toast.error("Please fix required fields in this step before continuing");
+  //     return false;
+  //   }
+  //   return true;
+  // };
+
+  // STEP VALIDATION AND ERROR DISPLAY LOGIC
+const validateStepAndShowAllErrors = async (validateForm, values, setTouched, stepIndex) => {
+  const errors = await validateForm();
+  const fields = stepFields[stepIndex] || [];
+
+  const stepHasErrors = fields.some((path) => hasErrorForPath(errors, path));
+
+  if (stepHasErrors) {
+    const touchedObj = {};
+
+    // mark simple fields
+    fields.forEach((path) => {
       const parts = path.split(".");
-      let v = errors;
-      for (const p of parts) {
-        if (!v) return false;
-        v = v[p];
+      let cur = touchedObj;
+      for (let i = 0; i < parts.length; i++) {
+        const p = parts[i];
+        if (i === parts.length - 1) {
+          cur[p] = true;
+        } else {
+          cur[p] = cur[p] || {};
+          cur = cur[p];
+        }
       }
-      return !!v;
     });
 
-    if (stepHasErrors) {
-      // mark the step fields as touched to show validation messages
-      const touchedObj = {};
-      fields.forEach((path) => {
-        const parts = path.split(".");
-        let cur = touchedObj;
-        for (let i = 0; i < parts.length; i++) {
-          const p = parts[i];
-          if (i === parts.length - 1) {
-            cur[p] = true;
-          } else {
-            cur[p] = cur[p] || {};
-            cur = cur[p];
-          }
-        }
-      });
-      setTouched((prev) => ({ ...prev, ...touchedObj }));
-      toast.error("Please fix required fields in this step before continuing");
-      return false;
+    // handle arrays (experiences, education)
+    if (stepIndex === 2) {
+      if (values.experiences && values.experiences.length > 0) {
+        touchedObj.experiences = values.experiences.map(() => ({
+          company: true,
+          years: true,
+          role: true,
+        }));
+      }
+      if (values.education && values.education.length > 0) {
+        touchedObj.education = values.education.map(() => ({
+          institution: true,
+          degree: true,
+          year: true,
+          certificate: true,
+        }));
+      }
     }
-    return true;
-  };
+
+    // MERGE CORRECTLY into Formik touched
+    setTouched(touchedObj);
+
+    toast.error("Please fix all required fields in this step before continuing");
+    return false;
+  }
+
+  return true;
+};
+
+
+
+// Also update the handleStepClick function to show all errors for the target step
+const handleStepClick = async (targetIndex, validateForm, values, setTouched) => {
+  if (targetIndex <= currentStep) {
+    setCurrentStep(targetIndex);
+    return;
+  }
+  
+  // Validate all steps up to the target index
+  const errors = await validateForm();
+  let firstInvalidStep = -1;
+  
+  // Check each step up to targetIndex
+  for (let step = 0; step < targetIndex; step++) {
+    const stepFieldsToCheck = stepFields[step] || [];
+    const stepHasErrors = stepFieldsToCheck.some(path => hasErrorForPath(errors, path));
+    
+    if (stepHasErrors) {
+      firstInvalidStep = step;
+      break;
+    }
+  }
+  
+  if (firstInvalidStep >= 0) {
+    // Show all errors for the first invalid step
+    const fields = stepFields[firstInvalidStep] || [];
+    const touchedObj = {};
+    
+    fields.forEach((path) => {
+      const parts = path.split(".");
+      let cur = touchedObj;
+      for (let i = 0; i < parts.length; i++) {
+        const p = parts[i];
+        if (i === parts.length - 1) {
+          cur[p] = true;
+        } else {
+          cur[p] = cur[p] || {};
+          cur = cur[p];
+        }
+      }
+    });
+    
+    // Handle array fields for step 2
+    if (firstInvalidStep === 2) {
+      if (values.experiences && values.experiences.length > 0) {
+        touchedObj.experiences = values.experiences.map(() => ({
+          company: true,
+          years: true,
+          role: true
+        }));
+      }
+      
+      if (values.education && values.education.length > 0) {
+        touchedObj.education = values.education.map(() => ({
+          institution: true,
+          degree: true,
+          year: true,
+          certificate: true
+        }));
+      }
+    }
+    
+    setTouched((prev) => ({ ...prev, ...touchedObj }));
+
+    
+    // Jump to the first invalid step
+    setCurrentStep(firstInvalidStep);
+    toast.error(`Please complete step ${firstInvalidStep + 1} before proceeding`);
+    return;
+  }
+  
+  // If all previous steps are valid, proceed
+  setCurrentStep(targetIndex);
+};
 
   useEffect(() => {
     // placeholder if you want side-effects on nav/footer sizes
@@ -543,12 +913,13 @@ const handleAutofillFromCV = async (file, setFieldValue) => {
 
   if (apiSuccess) return (
     <div className="flex flex-col items-center justify-center gap-1 text-center" style={{
-      height: `calc( 100vh - ${(navBarHeight + footerHeight)}px)`
+      height: `calc( 100vh  - ${( footerHeight)}px)`,
+      paddingTop: `${navBarHeight}px`
     }}>
       <IoCheckmarkSharp className="text-[300px] text-green-500"/>
       <p className="text-3xl font-bold">Thank You!</p>
       <p className="sm:text-2xl text-xl">Your application was successfully submitted</p>
-      <p className="text-xl text-gray-600">We will contact you soon</p>
+      <p className="text-xl text-gray-600">you will recive an email soon with a serial number</p>
     </div>
   );
 
@@ -562,16 +933,26 @@ const handleAutofillFromCV = async (file, setFieldValue) => {
             setApiError(null);
             setApiSuccess(null);
             try {
-              const personalImage = values.photo ? await uploadToCloudinary(values.photo) : "";
-              const cvUpload = values.cv ? await uploadToCloudinary(values.cv) : "";
+              const personalImage = values.photo
+                ? await uploadToCloudinary(values.photo)
+                : "";
+              const cvUpload = values.cv
+                ? await uploadToCloudinary(values.cv)
+                : "";
+                const certificates = await Promise.all(
+  values.education.map((edu) =>
+    edu.certificate ? uploadToCloudinary(edu.certificate) : ""
+  )
+);
+
               const res = await fetch(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Accept: "*/*" },
                 body: JSON.stringify({
                   personalId: 0,
-                  PersonalCvFirstName : values.firstName,
-                  PersonalCvMedilName  : values.middleName,
-                  PersonalCvLastName : values.lastName,
+                  PersonalCvFirstName: values.firstName,
+                  PersonalCvMedilName: values.middleName,
+                  PersonalCvLastName: values.lastName,
                   personalDepartmentId: Number(values.department),
                   personalJopId: Number(values.position),
                   personalBerthDate: values.birthDate,
@@ -590,30 +971,42 @@ const handleAutofillFromCV = async (file, setFieldValue) => {
                   personalSocialId: Number(values.socialStatus),
                   personalCvUploadPickt: personalImage,
                   personalCvUploadCV: cvUpload,
-                  personalCvsWorkExperiences: values.experiences?.map(e => ({
-                    personalCvsWorkExperienceCompanyName: e.company,
-                    personalCvsWorkExperienceRole: e.role,
-                    personalCvsWorkExperienceYear: Number(e.years),
-                  })) || [],
-                  peronalCvsEducations: values.education?.map(e => ({
-                    peronalCvEducationInstitution: e.institution,
-                    peronalCvEducationDegree: Number(e.degree),
-                    peronalCvEducationGraduationYear: Number(e.year),
-                  })) || [],
-                })
+                  personalCvsWorkExperiences:
+                    values.experiences?.map((e) => ({
+                      personalCvsWorkExperienceCompanyName: e.company,
+                      personalCvsWorkExperienceRole: e.role,
+                      personalCvsWorkExperienceYear: Number(e.years),
+                    })) || [],
+                 peronalCvsEducations:
+  values.education?.map((e, i) => ({
+    peronalCvEducationInstitution: e.institution,
+    peronalCvEducationDegree: Number(e.degree),
+    peronalCvEducationGraduationYear: Number(e.year),
+    PeronalCvEducationFileLink: certificates[i],
+  })) || [],
+
+                }),
               });
 
-              const data = await res.json().catch(()=>null);
+              const data = await res.json().catch(() => null);
               if (res.ok) {
                 setApiSuccess(true);
                 const summary = { ...values };
-                if (values.cv) summary.cv = { name: values.cv.name, size: values.cv.size };
-                if (values.photo) summary.photo = { name: values.photo.name, size: values.photo.size };
+                if (values.cv)
+                  summary.cv = { name: values.cv.name, size: values.cv.size };
+                if (values.photo)
+                  summary.photo = {
+                    name: values.photo.name,
+                    size: values.photo.size,
+                  };
                 setSubmitted(summary);
                 actions.resetForm();
                 setCurrentStep(0);
               } else {
-                setApiError((data && data.message) || `Submission failed (status ${res.status})`);
+                setApiError(
+                  (data && data.message) ||
+                    `Submission failed (status ${res.status})`
+                );
                 toast.error("something went wrong");
               }
             } catch (err) {
@@ -624,22 +1017,43 @@ const handleAutofillFromCV = async (file, setFieldValue) => {
             }
           }}
         >
-          {({ setFieldValue, isSubmitting, values, errors, touched, validateForm, setTouched }) => (
+          {({
+            setFieldValue,
+            isSubmitting,
+            values,
+            errors,
+            touched,
+            validateForm,
+            setTouched,
+            resetForm
+          }) => (
             <>
               <SubmitWatcher />
               <Form className="bg-white border rounded-2xl py-6 md:px-6 px-2 shadow-sm border-light-gray">
-                <h2 className="text-xl font-semibold text-secondary">Job Application</h2>
-                <p className="text-sm text-gray mt-1">Complete the form — step {currentStep + 1} of {steps.length}</p>
+                <h2 className="text-xl font-semibold text-secondary">
+                  Job Application
+                </h2>
+                <p className="text-sm text-gray mt-1">
+                  Complete the form — step {currentStep + 1} of {steps.length}
+                </p>
 
                 {/* STEP INDICATOR */}
-                <div className="mt-4 flex items-center gap-3">
+                <div className="mt-4 flex justify-between md:justify-center items-center md:gap-3 flex-wrap p-2">
                   {steps.map((s, i) => (
                     <div
                       key={s}
-                      className={`flex-1 text-center py-2 rounded-full cursor-pointer ${i === currentStep ? "bg-primary text-white" : i < currentStep ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600" }`}
-                      onClick={() => handleStepClick(i, validateForm, values, setTouched)}
+                      className={`md:flex-1 w-[45%] text-center py-2 my-2 rounded-full cursor-pointer ${
+                        i === currentStep
+                          ? "bg-primary text-white"
+                          : i < currentStep
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                      onClick={() =>
+                        handleStepClick(i, validateForm, values, setTouched)
+                      }
                     >
-                      {s}
+                      {s + " " + `(${i + 1})`} 
                     </div>
                   ))}
                 </div>
@@ -650,10 +1064,43 @@ const handleAutofillFromCV = async (file, setFieldValue) => {
                     <section className="rounded-xl flex gap-6 items-center md:flex-row-reverse flex-col">
                       {/* === CV Upload placed at the top for immediate autofill === */}
                       <div className="mb-4">
-                        <label className="block text-secondary text-sm mb-1">Upload CV (optional) — we will attempt to autofill fields</label>
-                        <div onClick={() => fileRef.current?.click()} className={`w-full rounded-full border px-4 py-2 text-sm bg-white flex items-center justify-between cursor-pointer ${errors.cv && touched.cv ? "border-danger" : "border-dashed border-light-gray"}`}>
-                          <span className="text-gray">{values.cv ? values.cv.name : "Click to upload CV (PDF / DOC / DOCX / TXT)"}</span>
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 16V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M8 12L12 8L16 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        <label className="block text-secondary text-sm mb-1 text-center">
+                          Upload CV (optional)
+                        </label>
+                        <div
+                          onClick={() => fileRef.current?.click()}
+                          className={`w-full rounded-full border px-4 py-2 text-sm bg-white flex items-center justify-between cursor-pointer ${
+                            errors.cv && touched.cv
+                              ? "border-danger"
+                              : "border-dashed border-light-gray"
+                          }`}
+                        >
+                          <span className="text-gray">
+                            {values.cv
+                              ? values.cv.name
+                              : "Click to upload CV (PDF / DOC / DOCX / TXT)"}
+                          </span>
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <path
+                              d="M12 16V8"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M8 12L12 8L16 12"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
                         </div>
                         <input
                           ref={fileRef}
@@ -665,73 +1112,282 @@ const handleAutofillFromCV = async (file, setFieldValue) => {
                             setFieldValue("cv", f);
                             if (f) {
                               // attempt autofill immediately
-                              await handleAutofillFromCV(f, setFieldValue);
+                              // await handleAutofillFromCV(f, setFieldValue);
                             }
                           }}
                         />
-                        <ErrorMessage name="cv" component="div" className="text-danger text-xs mt-1" />
+                        <ErrorMessage
+                          name="cv"
+                          component="div"
+                          className="text-danger text-xs mt-1"
+                        />
                         {values.cv && (
                           <div className="mt-2 flex gap-2">
-                            <button type="button" onClick={() => handleAutofillFromCV(values.cv, setFieldValue)} className="px-3 py-1 border rounded-full">Autofill from CV</button>
-                            <button type="button" onClick={() => { setFieldValue("cv", null); }} className="px-3 py-1 border rounded-full">Remove CV</button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleAutofillFromCV(values.cv, setFieldValue)
+                              }
+                              className="px-3 py-1 border rounded-full"
+                            >
+                              Autofill from CV
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFieldValue("cv", null);
+                              }}
+                              className="px-3 py-1 border rounded-full"
+                            >
+                              Remove CV
+                            </button>
                           </div>
                         )}
                       </div>
 
                       {/* Personal Data (same fields as before) */}
                       <div className="grid flex-1 grid-cols-1 w-full  gap-5">
-                        <div className="bg-light-gray p-4 rounded-lg flex flex-col gap-2.5 ">
-                          <h3 className="text-sm font-semibold text-secondary mb-3">Personal Data</h3>
+                        <div className="bg-light-gray p-4 rounded-lg flex flex-col gap-5 ">
+                          <h3 className="text-sm font-semibold text-secondary mb-3">
+                            Personal Data
+                          </h3>
                           <div>
-                            <label className="block text-secondary text-sm mb-1">First Name <span className="ms-1 font-semibold text-danger">(required)</span></label>
-                            <Field name="firstName" placeholder="First" className={`w-full rounded-full border px-4 py-2 text-sm ${errors.firstName && touched.firstName ? "border-danger" : "border-gray-200"}`} />
-                            <ErrorMessage name="firstName" component="div" className="text-danger text-xs mt-1" />
+                            <label className="block text-secondary text-sm mb-1">
+                              First Name{" "}
+                              <span className={`ms-1 font-semibold ${
+                                !errors.firstName && touched.firstName
+                                  ? "text-green-700"
+                                  : "text-danger"
+                              }`}>
+                                (required)
+                              </span>
+                            </label>
+                            <Field
+                              name="firstName"
+                              placeholder="First"
+                              className={`w-full rounded-full border px-4 py-2 text-sm ${
+                                errors.firstName && touched.firstName
+                                  ? "border-danger"
+                                  : "border-gray-200"
+                              }`}
+                            />
+                            <ErrorMessage
+                              name="firstName"
+                              component="div"
+                              className="text-danger text-xs mt-1"
+                            />
                           </div>
 
                           <div>
-                            <label className="block text-secondary text-sm mb-1">Middle Name <span className="ms-1 font-semibold text-danger">(required)</span></label>
-                            <Field name="middleName" placeholder="Middle" className={`w-full rounded-full border px-4 py-2 text-sm ${errors.middleName && touched.middleName ? "border-danger" : "border-gray-200"}`} />
-                            <ErrorMessage name="middleName" component="div" className="text-danger text-xs mt-1" />
+                            <label className="block text-secondary text-sm mb-1">
+                              Middle Name{" "}
+                              <span className={`ms-1 font-semibold ${
+                                !errors.middleName && touched.middleName
+                                  ? "text-green-700"
+                                  : "text-danger"
+                              }`}>
+                                (required)
+                              </span>
+                            </label>
+                            <Field
+                              name="middleName"
+                              placeholder="Middle"
+                              className={`w-full rounded-full border px-4 py-2 text-sm ${
+                                errors.middleName && touched.middleName
+                                  ? "border-danger"
+                                  : "border-gray-200"
+                              }`}
+                            />
+                            <ErrorMessage
+                              name="middleName"
+                              component="div"
+                              className="text-danger text-xs mt-1"
+                            />
                           </div>
 
                           <div>
-                            <label className="block text-secondary text-sm mb-1">Last Name <span className="ms-1 font-semibold text-danger">(required)</span></label>
-                            <Field name="lastName" placeholder="Last" className={`w-full rounded-full border px-4 py-2 text-sm ${errors.lastName && touched.lastName ? "border-danger" : "border-gray-200"}`} />
-                            <ErrorMessage name="lastName" component="div" className="text-danger text-xs mt-1" />
+                            <label className="block text-secondary text-sm mb-1">
+                              Last Name{" "}
+                              <span className={`ms-1 font-semibold ${
+                                !errors.lastName && touched.lastName
+                                  ? "text-green-700"
+                                  : "text-danger"
+                              }`}>
+                                (required)
+                              </span>
+                            </label>
+                            <Field
+                              name="lastName"
+                              placeholder="Last"
+                              className={`w-full rounded-full border px-4 py-2 text-sm ${
+                                errors.lastName && touched.lastName
+                                  ? "border-danger"
+                                  : "border-gray-200"
+                              }`}
+                            />
+                            <ErrorMessage
+                              name="lastName"
+                              component="div"
+                              className="text-danger text-xs mt-1"
+                            />
                           </div>
 
                           <div>
-                            <label className="block text-secondary text-sm mb-1">Birth Date <span className="ms-1 font-semibold text-danger">(required)</span></label>
-                            <Field name="birthDate" type="date" placeholder="Birth Date"  className={`w-full rounded-full border px-4 py-2 text-sm ${errors.birthDate && touched.birthDate ? "border-danger" : "border-gray-200"}`} />
-                            <ErrorMessage name="birthDate" component="div" className="text-danger text-xs mt-1" />
+                            <label className="block text-secondary text-sm mb-1">
+                              Birth Date{" "}
+                              <span className={`ms-1 font-semibold ${
+                                !errors.birthDate && touched.birthDate
+                                  ? "text-green-700"
+                                  : "text-danger"
+                              }`}>
+                                (required)
+                              </span>
+                            </label>
+                            <Field
+                              name="birthDate"
+                              type="date"
+                              placeholder="Birth Date"
+                              className={`w-full rounded-full border px-4 py-2 text-sm ${
+                                errors.birthDate && touched.birthDate
+                                  ? "border-danger"
+                                  : "border-gray-200"
+                              }`}
+                            />
+                            <ErrorMessage
+                              name="birthDate"
+                              component="div"
+                              className="text-danger text-xs mt-1"
+                            />
                           </div>
 
                           <div>
-                            <label className="block text-secondary text-sm mb-1">Gender <span className="ms-1 font-semibold text-danger">(required)</span></label>
-                            <Field as="select" name="gender" className={`w-full appearance-none rounded-full border px-4 py-2 text-sm ${errors.gender && touched.gender ? "border-danger" : "border-gray-200"}`}>
+                            <label className="block text-secondary text-sm mb-1">
+                              Gender{" "}
+                              <span className={`ms-1 font-semibold ${
+                                !errors.gender && touched.gender
+                                  ? "text-green-700"
+                                  : "text-danger"
+                              }`}>
+                                (required)
+                              </span>
+                            </label>
+                            <Field
+                              as="select"
+                              name="gender"
+                              className={`w-full  rounded-full border px-4 py-2 text-sm ${
+                                errors.gender && touched.gender
+                                  ? "border-danger"
+                                  : "border-gray-200"
+                              }`}
+                            >
                               <option value="">Select Gender</option>
-                              {genders && genders.map(g => <option value={g.personalGenderId} key={g.personalGenderId}>{g.personalGenderName}</option>)}
+                              {genders &&
+                                genders.map((g) => (
+                                  <option
+                                    value={g.personalGenderId}
+                                    key={g.personalGenderId}
+                                  >
+                                    {g.personalGenderName}
+                                  </option>
+                                ))}
                             </Field>
-                            <ErrorMessage name="gender" component="div" className="text-danger text-xs mt-1" />
+                            <ErrorMessage
+                              name="gender"
+                              component="div"
+                              className="text-danger text-xs mt-1"
+                            />
                           </div>
 
                           <div>
-                            <label className="block text-secondary text-sm mb-1">Social status <span className="ms-1 font-semibold text-danger">(required)</span></label>
-                            <Field as="select" name="socialStatus" className={`w-full rounded-full border px-4 py-2 text-sm ${errors.socialStatus && touched.socialStatus ? "border-danger" : "border-gray-200"}`}>
+                            <label className="block text-secondary text-sm mb-1">
+                              Social status{" "}
+                              <span className={`ms-1 font-semibold text-danger ${
+                                !errors.socialStatus && touched.socialStatus
+                                  ? "text-green-700"
+                                  : "text-danger"
+                              }`}>
+                                (required)
+                              </span>
+                            </label>
+                            <Field
+                              as="select"
+                              name="socialStatus"
+                              className={`w-full rounded-full border px-4 py-2 text-sm ${
+                                errors.socialStatus && touched.socialStatus
+                                  ? "border-danger"
+                                  : "border-gray-200"
+                              }`}
+                            >
                               <option value="">Select Social Status</option>
-                              {socials && socials.map(s => <option value={s.personalSocialId} key={s.personalSocialId}>{s.personalSocialName}</option>)}
+                              {socials &&
+                                socials.map((s) => (
+                                  <option
+                                    value={s.personalSocialId}
+                                    key={s.personalSocialId}
+                                  >
+                                    {s.personalSocialName}
+                                  </option>
+                                ))}
                             </Field>
-                            <ErrorMessage name="socialStatus" component="div" className="text-danger text-xs mt-1" />
+                            <ErrorMessage
+                              name="socialStatus"
+                              component="div"
+                              className="text-danger text-xs mt-1"
+                            />
                           </div>
 
                           <div>
-                            <label className="block text-secondary text-sm mb-1">Photo</label>
-                            <div onClick={() => photoRef.current?.click()} className="w-full rounded-full border px-4 py-2 text-sm bg-white flex items-center justify-between cursor-pointer">
-                              <span className="text-gray">{values.photo ? values.photo.name : "Upload photo"}</span>
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 16V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M8 12L12 8L16 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            <label className="block text-secondary text-sm mb-1">
+                              Photo
+                            </label>
+                            <div
+                              onClick={() => photoRef.current?.click()}
+                              className="w-full rounded-full border px-4 py-2 text-sm bg-white flex items-center justify-between cursor-pointer"
+                            >
+                              <span className="text-gray">
+                                {values.photo
+                                  ? values.photo.name
+                                  : "Upload photo"}
+                              </span>
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                              >
+                                <path
+                                  d="M12 16V8"
+                                  stroke="currentColor"
+                                  strokeWidth="1.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                                <path
+                                  d="M8 12L12 8L16 12"
+                                  stroke="currentColor"
+                                  strokeWidth="1.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
                             </div>
-                            <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={(e)=> setFieldValue("photo", e.currentTarget.files?.[0] || null)} />
-                            <ErrorMessage name="photo" component="div" className="text-danger text-xs mt-1" />
+                            <input
+                              ref={photoRef}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) =>
+                                setFieldValue(
+                                  "photo",
+                                  e.currentTarget.files?.[0] || null
+                                )
+                              }
+                            />
+                            <ErrorMessage
+                              name="photo"
+                              component="div"
+                              className="text-danger text-xs mt-1"
+                            />
                           </div>
                         </div>
                         {/* empty right column or other content if needed */}
@@ -742,74 +1398,271 @@ const handleAutofillFromCV = async (file, setFieldValue) => {
                   {currentStep === 1 && (
                     <section>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="bg-light-gray p-4 rounded-lg">
-                          <h3 className="text-sm font-semibold text-secondary mb-3">Address Information</h3>
+                        <div className="bg-light-gray p-4 rounded-lg flex flex-col gap-5">
+                          <h3 className="text-sm font-semibold text-secondary ">
+                            Address Information
+                          </h3>
 
                           <div>
-                            <label className="block text-secondary text-sm mb-1">Country <span className="ms-1 font-semibold text-danger">(required)</span></label>
+                            <label className="block text-secondary text-sm mb-1">
+                              Country{" "}
+                              <span className={`ms-1 font-semibold ${
+                                !errors.location?.country && touched.location?.country
+                                  ? "text-green-700"
+                                  : "text-danger"
+                              }`}>
+                                (required)
+                              </span>
+                            </label>
                             <div className="relative">
-                              <Field as="select" name="location.country" onChange={(e)=>{ setSelectedCountry(e.target.value); setFieldValue("location.country", e.target.value); setFieldValue("location.city", ""); setFieldValue("location.area", ""); }} className={`w-full rounded-full border px-4 py-2 pr-10 text-sm ${errors.location?.country && touched.location?.country ? "border-danger" : "border-gray-200"}`}>
+                              <Field
+                                as="select"
+                                name="location.country"
+                                onChange={(e) => {
+                                  setSelectedCountry(e.target.value);
+                                  setFieldValue(
+                                    "location.country",
+                                    e.target.value
+                                  );
+                                  setFieldValue("location.city", "");
+                                  setFieldValue("location.area", "");
+                                }}
+                                className={`w-full rounded-full border px-4 py-2 pr-10 text-sm ${
+                                  errors.location?.country &&
+                                  touched.location?.country
+                                    ? "border-danger"
+                                    : "border-gray-200"
+                                }`}
+                              >
                                 <option value="">Select country</option>
-                                {uniqueCountries && uniqueCountries.map(c => <option value={c.countryID} key={c.countryID}>{c.countryName}</option>)}
+                                {uniqueCountries &&
+                                  uniqueCountries.map((c) => (
+                                    <option
+                                      value={c.countryID}
+                                      key={c.countryID}
+                                    >
+                                      {c.countryName}
+                                    </option>
+                                  ))}
                               </Field>
                             </div>
-                            <ErrorMessage name="location.country" component="div" className="text-danger text-xs mt-1" />
+                            <ErrorMessage
+                              name="location.country"
+                              component="div"
+                              className="text-danger text-xs mt-1"
+                            />
                           </div>
 
                           <div>
-                            <label className="block text-secondary text-sm mb-1">City <span className="ms-1 font-semibold text-danger">(required)</span></label>
-                            <Field as="select" name="location.city" disabled={!selectedCountry} onChange={(e)=>{ setSelectedCity(e.target.value); setFieldValue("location.city", e.target.value); setFieldValue("location.area", ""); }} className={`w-full rounded-full border px-4 py-2 pr-10 text-sm ${errors.location?.city && touched.location?.city ? "border-danger" : "border-gray-200"}`}>
+                            <label className="block text-secondary text-sm mb-1">
+                              City{" "}
+                              <span className={`ms-1 font-semibold ${
+                                !errors.location?.city && touched.location?.city
+                                  ? "text-green-700"
+                                  : "text-danger"
+                              }`}>
+                                (required)
+                              </span>
+                            </label>
+                            <Field
+                              as="select"
+                              name="location.city"
+                              disabled={!selectedCountry}
+                              onChange={(e) => {
+                                setSelectedCity(e.target.value);
+                                setFieldValue("location.city", e.target.value);
+                                setFieldValue("location.area", "");
+                              }}
+                              className={`w-full rounded-full border px-4 py-2 pr-10 text-sm ${
+                                errors.location?.city && touched.location?.city
+                                  ? "border-danger"
+                                  : "border-gray-200"
+                              }`}
+                            >
                               <option value="">Select city</option>
-                              {uniqueCities && uniqueCities.map(c => <option value={c.cityID} key={c.cityID}>{c.cityName}</option>)}
+                              {uniqueCities &&
+                                uniqueCities.map((c) => (
+                                  <option value={c.cityID} key={c.cityID}>
+                                    {c.cityName}
+                                  </option>
+                                ))}
                             </Field>
-                            <ErrorMessage name="location.city" component="div" className="text-danger text-xs mt-1" />
+                            <ErrorMessage
+                              name="location.city"
+                              component="div"
+                              className="text-danger text-xs mt-1"
+                            />
                           </div>
 
                           <div>
-                            <label className="block text-secondary text-sm mb-1">Area / District <span className="ms-1 font-semibold text-danger">(required)</span></label>
-                            <Field as="select" name="location.area" disabled={!selectedCountry || !selectedCity} className={`w-full rounded-full border px-4 py-2 pr-10 text-sm ${errors.location?.area && touched.location?.area ? "border-danger" : "border-gray-200"}`}>
+                            <label className="block text-secondary text-sm mb-1">
+                              Area / District{" "}
+                              <span className={`ms-1 font-semibold ${
+                                !errors.location?.area && touched.location?.area
+                                  ? "text-green-700"
+                                  : "text-danger"
+                              }`}>
+                                (required)
+                              </span>
+                            </label>
+                            <Field
+                              as="select"
+                              name="location.area"
+                              disabled={!selectedCountry || !selectedCity}
+                              className={`w-full rounded-full border px-4 py-2 pr-10 text-sm ${
+                                errors.location?.area && touched.location?.area
+                                  ? "border-danger"
+                                  : "border-gray-200"
+                              }`}
+                            >
                               <option value="">Select area</option>
-                              {uniqueAreas && uniqueAreas.map(a => <option value={a.ariaID} key={a.ariaID}>{a.ariaName}</option>)}
+                              {uniqueAreas &&
+                                uniqueAreas.map((a) => (
+                                  <option value={a.ariaID} key={a.ariaID}>
+                                    {a.ariaName}
+                                  </option>
+                                ))}
                             </Field>
-                            <ErrorMessage name="location.area" component="div" className="text-danger text-xs mt-1" />
+                            <ErrorMessage
+                              name="location.area"
+                              component="div"
+                              className="text-danger text-xs mt-1"
+                            />
                           </div>
 
                           <div>
-                            <label className="block text-secondary text-sm mb-1">Address <span className="ms-1 font-semibold text-danger">(required)</span></label>
-                            <Field name="location.address" placeholder="address" className={`w-full rounded-full border px-4 py-2 text-sm ${errors.location?.address && touched.location?.address ? "border-danger" : "border-gray-200"}`} />
-                            <ErrorMessage name="location.address" component="div" className="text-danger text-xs mt-1" />
+                            <label className="block text-secondary text-sm mb-1">
+                              Address{" "}
+                              <span className={`ms-1 font-semibold text-danger ${
+                                !errors.location?.address && touched.location?.address
+                                  ? "text-green-700"
+                                  : "text-danger"
+                              }`}>
+                                (required)
+                              </span>
+                            </label>
+                            <Field
+                              name="location.address"
+                              placeholder="address"
+                              className={`w-full rounded-full border px-4 py-2 text-sm ${
+                                errors.location?.address &&
+                                touched.location?.address
+                                  ? "border-danger"
+                                  : "border-gray-200"
+                              }`}
+                            />
+                            <ErrorMessage
+                              name="location.address"
+                              component="div"
+                              className="text-danger text-xs mt-1"
+                            />
                           </div>
                         </div>
 
-                        <div className="bg-light-gray p-4 rounded-lg">
-                          <h3 className="text-sm font-semibold text-secondary mb-3">Contact Info</h3>
+                        <div className="bg-light-gray p-4 rounded-lg flex flex-col gap-5">
+                          <h3 className="text-sm font-semibold text-secondary ">
+                            Contact Info
+                          </h3>
                           <div>
-                            <label className="block text-secondary text-sm mb-1">Email <span className="ms-1 font-semibold text-danger">(required)</span></label>
-                            <Field name="email" type="email" placeholder="you@domain.com" className={`w-full rounded-full border px-4 py-2 text-sm ${errors.email && touched.email ? "border-danger" : "border-gray-200"}`} />
-                            <ErrorMessage name="email" component="div" className="text-danger text-xs mt-1" />
+                            <label className="block text-secondary text-sm mb-1">
+                              Email{" "}
+                              <span className={`ms-1 font-semibold ${
+                                !errors.email && touched.email
+                                  ? "text-green-700"
+                                  : "text-danger"
+                              }`}>
+                                (required)
+                              </span>
+                            </label>
+                            <Field
+                              name="email"
+                              type="email"
+                              placeholder="you@domain.com"
+                              className={`w-full rounded-full border px-4 py-2 text-sm ${
+                                errors.email && touched.email
+                                  ? "border-danger"
+                                  : "border-gray-200"
+                              }`}
+                            />
+                            <ErrorMessage
+                              name="email"
+                              component="div"
+                              className="text-danger text-xs mt-1"
+                            />
                           </div>
 
                           <div>
-                            <label className="block text-secondary text-sm mb-1">Phone <span className="ms-1 font-semibold text-danger">(required)</span></label>
-                            <div className={`flex items-center w-full rounded-full border bg-white overflow-hidden ${errors.phone && touched.phone ? "border-danger" : "border-gray-200"}`}>
-                              <Field as="select" name="phoneCode" className="h-full bg-transparent px-3 py-2 text-sm text-secondary border-r border-gray-200 focus:outline-none">
-                                {COUNTRY_CODES.map((c) => <option key={c.code} value={c.code}>{c.code}</option>)}
+                            <label className="block text-secondary text-sm mb-1">
+                              Phone{" "}
+                              <span className={`ms-1 font-semibold ${
+                                !errors.phone && touched.phone
+                                  ? "text-green-700"
+                                  : "text-danger"
+                              }`}>
+                                (required)
+                              </span>
+                            </label>
+                            <div
+                              className={`flex items-center w-full rounded-full border bg-white overflow-hidden ${
+                                errors.phone && touched.phone
+                                  ? "border-danger"
+                                  : "border-gray-200"
+                              }`}
+                            >
+                              <Field
+                                as="select"
+                                name="phoneCode"
+                                className="h-full bg-transparent px-3 py-2 text-sm text-secondary border-r border-gray-200 focus:outline-none"
+                              >
+                                {COUNTRY_CODES.map((c) => (
+                                  <option key={c.code} value={c.code}>
+                                    {c.code}
+                                  </option>
+                                ))}
                               </Field>
-                              <Field name="phone" placeholder="xxx xxx xxxx" className="flex-1 px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none" />
+                              <Field
+                                name="phone"
+                                placeholder="xxx xxx xxxx"
+                                className="flex-1 px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none"
+                              />
                             </div>
-                            <ErrorMessage name="phone" component="div" className="text-danger text-xs mt-1" />
+                            <ErrorMessage
+                              name="phone"
+                              component="div"
+                              className="text-danger text-xs mt-1"
+                            />
                           </div>
 
                           <div>
-                            <label className="block text-secondary text-sm mb-1">LinkedIn Profile</label>
-                            <Field name="linkedin" placeholder="https://linkedin.com/in/you" className="w-full rounded-full border px-4 py-2 text-sm border-gray-200" />
-                            <ErrorMessage name="linkedin" component="div" className="text-danger text-xs mt-1" />
+                            <label className="block text-secondary text-sm mb-1">
+                              LinkedIn Profile
+                            </label>
+                            <Field
+                              name="linkedin"
+                              placeholder="https://linkedin.com/in/you"
+                              className="w-full rounded-full border px-4 py-2 text-sm border-gray-200"
+                            />
+                            <ErrorMessage
+                              name="linkedin"
+                              component="div"
+                              className="text-danger text-xs mt-1"
+                            />
                           </div>
 
                           <div>
-                            <label className="block text-secondary text-sm mb-1">Github Profile</label>
-                            <Field name="github" placeholder="https://github.com/you" className="w-full rounded-full border px-4 py-2 text-sm border-gray-200" />
-                            <ErrorMessage name="github" component="div" className="text-danger text-xs mt-1" />
+                            <label className="block text-secondary text-sm mb-1">
+                              Github Profile
+                            </label>
+                            <Field
+                              name="github"
+                              placeholder="https://github.com/you"
+                              className="w-full rounded-full border px-4 py-2 text-sm border-gray-200"
+                            />
+                            <ErrorMessage
+                              name="github"
+                              component="div"
+                              className="text-danger text-xs mt-1"
+                            />
                           </div>
                         </div>
                       </div>
@@ -817,286 +1670,863 @@ const handleAutofillFromCV = async (file, setFieldValue) => {
                   )}
 
                   {currentStep === 2 && (
-                    <section className="mt-4 bg-light-gray rounded-xl p-4">
-                      <h3 className="text-sm font-semibold text-secondary mb-3">Application Details</h3>
+                    <section className="mt-4 bg-light-gray rounded-xl p-4 flex flex-col gap-5">
+                      <h3 className="text-sm font-semibold text-secondary ">
+                        Application Details
+                      </h3>
                       <div>
-                        <label className="block text-secondary text-sm mb-1">Department <span className="ms-1 font-semibold text-danger">(required)</span></label>
-                        <Field as="select" name="department" className={`w-full rounded-full border px-4 py-2 pr-10 text-sm ${errors.department && touched.department ? "border-danger": "border-gray-200"}`}>
+                        <label className="block text-secondary text-sm mb-1">
+                          Department{" "}
+                          <span className={`ms-1 font-semibold ${
+                                !errors.department && touched.department
+                                  ? "text-green-700"
+                                  : "text-danger"
+                              }`}>
+                            (required)
+                          </span>
+                        </label>
+                        <Field
+                          as="select"
+                          name="department"
+                          className={`w-full rounded-full border px-4 py-2 pr-10 text-sm ${
+                            errors.department && touched.department
+                              ? "border-danger"
+                              : "border-gray-200"
+                          }`}
+                        >
                           <option value="">Select department</option>
-                          {departments && departments.map(d => <option value={d.departmentId} key={d.departmentId}>{d.departmentName}</option>)}
+                          {departments &&
+                            departments.map((d) => (
+                              <option
+                                value={d.departmentId}
+                                key={d.departmentId}
+                              >
+                                {d.departmentName}
+                              </option>
+                            ))}
                         </Field>
-                        <ErrorMessage name="department" component="div" className="text-danger text-xs mt-1" />
+                        <ErrorMessage
+                          name="department"
+                          component="div"
+                          className="text-danger text-xs mt-1"
+                        />
                       </div>
 
                       <div className="mt-3">
-                        <label className="block text-secondary text-sm mb-1">Position Applying For <span className="ms-1 font-semibold text-danger">(required)</span></label>
-                        <Field as="select" name="position" className={`w-full rounded-full border px-4 py-2 pr-10 text-sm ${errors.position && touched.position ? "border-danger": "border-gray-200"}`}>
+                        <label className="block text-secondary text-sm mb-1">
+                          Position Applying For{" "}
+                          <span className={`ms-1 font-semibold ${
+                                !errors.position && touched.position
+                                  ? "text-green-700"
+                                  : "text-danger"
+                              }`}>
+                            (required)
+                          </span>
+                        </label>
+                        <Field
+                          as="select"
+                          name="position"
+                          className={`w-full rounded-full border px-4 py-2 pr-10 text-sm ${
+                            errors.position && touched.position
+                              ? "border-danger"
+                              : "border-gray-200"
+                          }`}
+                        >
                           <option value="">Select position</option>
-                          {jobs && jobs.map(j => <option value={j.jopId} key={j.jopId}>{j.jopName}</option>)}
+                          {jobs &&
+                            jobs.map((j) => (
+                              <option value={j.jopId} key={j.jopId}>
+                                {j.jopName}
+                              </option>
+                            ))}
                         </Field>
-                        <ErrorMessage name="position" component="div" className="text-danger text-xs mt-1" />
+                        <ErrorMessage
+                          name="position"
+                          component="div"
+                          className="text-danger text-xs mt-1"
+                        />
                       </div>
 
                       <div className="mt-4">
-                        <label className="block text-secondary text-sm mb-1">Why we should hire you ?</label>
-                        <Field as="textarea" name="cover" rows={4} className="w-full rounded-xl border px-4 py-2 text-sm bg-white placeholder-gray-400" />
+                        <label className="block text-secondary text-sm mb-1">
+                          Why we should hire you ?
+                        </label>
+                        <Field
+                          as="textarea"
+                          name="cover"
+                          rows={4}
+                          className="w-full rounded-xl border px-4 py-2 text-sm bg-white placeholder-gray-400"
+                        />
                       </div>
 
                       <div className="mt-4">
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-sm font-semibold text-secondary">Work Experience</h4>
-                          <FieldArray name="experiences">{({ push }) => (
-                            <div>
-                              <button type="button" onClick={() => push({ company: "", years: "", role: "" })} className="text-sm rounded-full px-3 py-1 border" style={{background: "var(--color-secondary)", color:"white"}}>+ Add</button>
-                            </div>
-                          )}</FieldArray>
-                        </div>
-                        <FieldArray name="experiences">{({ remove, push }) => (
-                          <div className="space-y-3">
-                            {values.experiences && values.experiences.map((exp, idx) => (
-                              <div key={idx} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-                                <div className="md:col-span-5"><Field name={`experiences.${idx}.company`} placeholder="Company name" className="w-full rounded-full border px-4 py-2 text-sm" /></div>
-                                <div className="md:col-span-3"><Field name={`experiences.${idx}.role`} placeholder="Role / Title" className="w-full rounded-full border px-4 py-2 text-sm" /></div>
-                                <div className="md:col-span-3"><Field name={`experiences.${idx}.years`} placeholder="Years of experience" className="w-full rounded-full border px-4 py-2 text-sm" /></div>
-                                <div className="md:col-span-1"><button type="button" onClick={() => remove(idx)} className="text-red-500"><FaTrashAlt /></button></div>
-                                <div className="col-span-12"><ErrorMessage name={`experiences.${idx}.company`} component="div" className="text-danger text-xs mt-1" /></div>
+                          <h4 className="text-sm font-semibold text-secondary">
+                            Work Experience
+                          </h4>
+                          <FieldArray name="experiences">
+                            {({ push }) => (
+                              <div>
+                                <button
+                                  type="button"
+                                  onClick={() =>{
+                                    if (values.experiences.length ==0 || values.experiences[values.experiences.length - 1].company == "gap") {
+
+                                      push({ company: "", years: "", role: "",id: nanoid(), })
+                                    }else{
+                                      setGapPopup(true)
+                                    }}
+                                  }
+                                  className="text-sm rounded-full px-3 py-1 border"
+                                  style={{
+                                    background: "var(--color-secondary)",
+                                    color: "white",
+                                  }}
+                                >
+                                  + Add
+                                </button>
+                                {gapPopup && 
+                                <div className="fixed left-0 top-0 bg-[#00000044] flex items-center justify-center w-screen h-screen">
+                                  <div className="bg-white rounded-3xl min-w-1/3 p-9 flex flex-col items-center justify-center gap-6">
+                                  <p>Did you take a break from work ?</p>
+                                  <div className="flex items-center justify-center gap-5">
+                                  <button className="text-sm rounded-full px-3 py-1 border" onClick={() =>
+                                    {push({ company: "gap", years: "", role: "" })
+                                    setGapPopup(false)}
+                                  }
+                                   style={{background:"var(--color-secondary)",color:"white"}}>Yes</button>
+                                  <button className="text-sm rounded-full px-3 py-1 border" onClick={() =>
+                                  {  push({ company: "", years: "", role: "" })
+                                    setGapPopup(false)}
+                                  } style={{background:"var(--color-secondary)",color:"white"}}>No</button>
+                                  </div>
+                                  </div>
+                                </div>
+                                }
                               </div>
-                            ))}
-                          </div>
-                        )}</FieldArray>
+                            )}
+                          </FieldArray>
+                        </div>
+                        <FieldArray name="experiences">
+                          {({ remove, push }) => (
+                            <div className="space-y-3">
+                              {values.experiences &&
+                                values.experiences.length > 0 &&
+                                values.experiences.map((exp, idx, arr) => {
+                                    const experienceNo =arr.slice(0, idx).filter(e => e.company !== "gap").length + 1;
+                                    const gapNo =arr.slice(0, idx).filter(e => e.company === "gap").length + 1;
+
+                                  if (exp.company === "gap") {
+                                    return (
+                                    <div className="">
+                                    <div key={exp.id} className="text-xs flex justify-between grid-cols-12 mt-5 mb-2">
+                                      <h4 className="">
+                                        Gap No {gapNo}
+                                      </h4>
+                                      <button
+                                        type="button"
+                                        onClick={() => remove(idx)}
+                                        className="text-sm text-red-500 md:hidden"
+                                      >
+                                        <FaTrashAlt />
+                                      </button>
+                                    </div>
+                                    <div
+                                      key={idx+"-"+exp.id}
+                                      className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center "
+                                    >
+
+                                      <div className="md:col-span-8">
+                                        <Field
+                                          name={`experiences.${idx}.role`}
+                                          placeholder="What is the reason for taking a break ?"
+                                          className="w-full rounded-full border border-gray-200 px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none"
+                                        />
+                                       <ErrorMessage name={`experiences.${idx}.role`}>
+                                         {msg => (
+                                           <div className="text-danger text-xs mt-1">
+                                             {msg === "Role is required" ? "Reason is required" : msg}
+                                           </div>
+                                         )}
+                                       </ErrorMessage>
+
+                                      </div>
+                                      <div className="md:col-span-3">
+                                        <Field
+                                          name={`experiences.${idx}.years`}
+                                          placeholder="start year"
+                                          className="w-full rounded-full border border-gray-200 px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none"
+                                        />
+                                        <ErrorMessage
+                                          name={`experiences.${idx}.years`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 md:hidden"
+                                        />
+                                      </div>
+
+                                      <div className="md:col-span-1 md:flex justify-end hidden">
+                                        <button
+                                          type="button"
+                                          onClick={() => remove(idx)}
+                                          className="text-sm text-red-500"
+                                        >
+                                          <FaTrashAlt />
+                                        </button>
+                                      </div>
+                                    </div>
+                                    <div className="hidden md:grid md:grid-cols-12 gap-3 items-center ">
+                                      <div className="col-span-5">
+                                        <ErrorMessage
+                                          name={`experiences.${idx}.company`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 "
+                                        />
+                                      </div>
+                                      <div className="col-span-3">
+                                        {/* <ErrorMessage
+                                          name={`experiences.${idx}.role`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 "
+                                        /> */}
+                                      </div>
+                                      <div className="col-span-3">
+                                        <ErrorMessage
+                                          name={`experiences.${idx}.years`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 "
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>)
+                                  }
+                                  return (
+                                  <div key={exp.id} className="">
+                                    <div className="text-xs flex justify-between grid-cols-12 mt-5 mb-2">
+                                      <h4 className="">
+                                        Experience No {experienceNo}
+                                      </h4>
+                                      <button
+                                        type="button"
+                                        onClick={() => remove(idx)}
+                                        className="text-sm text-red-500 md:hidden"
+                                      >
+                                        <FaTrashAlt />
+                                      </button>
+                                    </div>
+                                    <div
+                                      key={idx}
+                                      className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center "
+                                    >
+                                      <div className="md:col-span-5">
+                                        <Field
+                                          name={`experiences.${idx}.company`}
+                                          placeholder="Company name"
+                                          className="w-full rounded-full border border-gray-200 px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none"
+                                        />
+                                        <ErrorMessage
+                                          name={`experiences.${idx}.company`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 md:hidden"
+                                        />
+                                      </div>
+
+                                      <div className="md:col-span-3">
+                                        <Field
+                                          name={`experiences.${idx}.role`}
+                                          placeholder="Role / Title"
+                                          className="w-full rounded-full border border-gray-200 px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none"
+                                        />
+                                        <ErrorMessage
+                                          name={`experiences.${idx}.role`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 md:hidden"
+                                        />
+                                      </div>
+                                      <div className="md:col-span-3">
+                                        <Field
+                                          name={`experiences.${idx}.years`}
+                                          placeholder="start year"
+                                          className="w-full rounded-full border border-gray-200 px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none"
+                                        />
+                                        <ErrorMessage
+                                          name={`experiences.${idx}.years`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 md:hidden"
+                                        />
+                                      </div>
+
+                                      <div className="md:col-span-1 md:flex justify-end hidden">
+                                        <button
+                                          type="button"
+                                          onClick={() => remove(idx)}
+                                          className="text-sm text-red-500"
+                                        >
+                                          <FaTrashAlt />
+                                        </button>
+                                      </div>
+                                    </div>
+                                    <div className="hidden md:grid md:grid-cols-12 gap-3 items-center ">
+                                      <div className="col-span-5">
+                                        <ErrorMessage
+                                          name={`experiences.${idx}.company`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 "
+                                        />
+                                      </div>
+                                      <div className="col-span-3">
+                                        <ErrorMessage
+                                          name={`experiences.${idx}.role`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 "
+                                        />
+                                      </div>
+                                      <div className="col-span-3">
+                                        <ErrorMessage
+                                          name={`experiences.${idx}.years`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 "
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>)
+})}
+                            </div>
+                          )}
+                        </FieldArray>
                       </div>
 
                       <div className="mt-6">
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-sm font-semibold text-secondary">Education</h4>
-                          <FieldArray name="education">{({ push }) => (
-                            <div><button type="button" onClick={() => push({ institution: "", degree: "", year: "" })} className="text-sm rounded-full px-3 py-1 border" style={{background: "var(--color-secondary)", color:"white"}}>+ Add</button></div>
-                          )}</FieldArray>
-                        </div>
-                        <FieldArray name="education">{({ remove }) => (
-                          <div className="space-y-3">
-                            {values.education && values.education.map((ed, idx) => (
-                              <div key={idx} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-                                <div className="md:col-span-5"><Field name={`education.${idx}.institution`} placeholder="Institution" className="w-full rounded-full border px-4 py-2 text-sm" /></div>
-                                <div className="md:col-span-3"><Field name={`education.${idx}.degree`} placeholder="Degree / Major" className="w-full rounded-full border px-4 py-2 text-sm" /></div>
-                                <div className="md:col-span-3"><Field name={`education.${idx}.year`} placeholder="Graduation Year" className="w-full rounded-full border px-4 py-2 text-sm" /></div>
-                                <div className="md:col-span-1"><button type="button" onClick={() => remove(idx)} className="text-red-500"><FaTrashAlt /></button></div>
+                          <h4 className="text-sm font-semibold text-secondary">
+                            Education
+                          </h4>
+                          <FieldArray name="education">
+                            {({ push }) => (
+                              <div>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    push({
+                                      institution: "",
+                                      degree: "",
+                                      year: "",
+                                      certificate: null,
+                                    })
+                                  }
+                                  className="text-sm rounded-full px-3 py-1 border"
+                                  style={{
+                                    background: "var(--color-secondary)",
+                                    color: "white",
+                                  }}
+                                >
+                                  + Add
+                                </button>
                               </div>
-                            ))}
-                          </div>
-                        )}</FieldArray>
-                      </div>
+                            )}
+                          </FieldArray>
+                        </div>
+                        <FieldArray name="education">
+                          {({ remove }) => (
+                            <div className="space-y-3">
+                              {values.education &&
+                                values.education.map((ed, idx) => (
+                                  <div>
+                                  <div
+                                    key={idx}
+                                    className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center"
+                                  >
+                                    <div className="md:col-span-4">
+                                      <Field
+                                        name={`education.${idx}.institution`}
+                                        placeholder="Institution"
+                                        className="w-full rounded-full border px-4 py-2 text-sm"
+                                      />
+                                      <ErrorMessage
+                                          name={`education.${idx}.institution`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 md:hidden"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-3">
+                                      <Field
+                                        name={`education.${idx}.degree`}
+                                        placeholder="Degree / Major"
+                                        className="w-full rounded-full border px-4 py-2 text-sm"
+                                      />
+                                      <ErrorMessage
+                                          name={`education.${idx}.degree`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 md:hidden"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                      <Field
+                                        name={`education.${idx}.year`}
+                                        placeholder="Graduation Year"
+                                        className="w-full rounded-full border px-4 py-2 text-sm"
+                                      />
+                                      <ErrorMessage
+                                          name={`education.${idx}.year`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 md:hidden"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <input
+                                         type="file"
+                                         name={`education.${idx}.certificate`}
+                                         className="cursor-pointer w-full rounded-full border px-4 py-2 text-sm bg-primary text-white"
+                                         onChange={(event) => {
+                                           setFieldValue(
+                                             `education.${idx}.certificate`,
+                                             event.currentTarget.files[0]
+                                           );
+                                         }}
+                                       />
+                                       <ErrorMessage
+                                          name={`education.${idx}.certificate`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 md:hidden"
+                                        />
 
+                                    </div>
+                                    <div className="md:col-span-1 flex justify-end">
+                                      <button
+                                        type="button"
+                                        onClick={() => remove(idx)}
+                                        className="text-red-500"
+                                      >
+                                        <FaTrashAlt />
+                                      </button>
+                                    </div>
+                                  </div>
+                                    <div className="hidden md:grid md:grid-cols-12 gap-3 items-center ">
+                                      <div className="col-span-4">
+                                        <ErrorMessage
+                                          name={`education.${idx}.institution`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 "
+                                        />
+                                      </div>
+                                      <div className="col-span-3">
+                                        <ErrorMessage
+                                          name={`education.${idx}.degree`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 "
+                                        />
+                                      </div>
+                                      <div className="col-span-2">
+                                        <ErrorMessage
+                                          name={`education.${idx}.year`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 "
+                                        />
+                                      </div>
+                                      <div className="col-span-2">
+                                        <ErrorMessage
+                                          name={`education.${idx}.certificate`}
+                                          component="div"
+                                          className="text-danger text-xs mt-1 "
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                          )}
+                        </FieldArray>
+                      </div>
                     </section>
                   )}
-{currentStep === 3 && (
-  <section className="max-w-5xl mx-auto bg-white p-10 print:p-6 text-slate-800">
-    <div className="grid grid-cols-12 gap-8">
-      {/* LEFT COLUMN - narrow sidebar (photo, contacts, awards, skills) */}
-      <aside className="col-span-4">
-        <div className="flex flex-col items-center">
-          {/* circular photo with accent ring */}
-          <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-primary mb-4">
-  {values.photo ? (
-    <img
-      src={
-        typeof values.photo === "string"
-          ? values.photo
-          : URL.createObjectURL(values.photo)
-      }
-      alt="Candidate"
-      className="w-full h-full object-cover"
-    />
-  ) : (
-    <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400 text-xs">
-      No photo
-    </div>
-  )}
-</div>
+                  {currentStep === 3 && (
+                    <section className="max-w-5xl mx-auto bg-white p-10 print:p-6 text-slate-800">
+                      <div className="grid grid-cols-12 gap-8">
+                        {/* LEFT COLUMN - narrow sidebar (photo, contacts, awards, skills) */}
+                        <aside className="col-span-4">
+                          <div className="flex flex-col items-center">
+                            {/* circular photo with accent ring */}
+                            <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-primary mb-4">
+                              {values.photo ? (
+                                <img
+                                  src={
+                                    typeof values.photo === "string"
+                                      ? values.photo
+                                      : URL.createObjectURL(values.photo)
+                                  }
+                                  alt="Candidate"
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400 text-xs">
+                                  No photo
+                                </div>
+                              )}
+                            </div>
 
+                            {/* Contacts block */}
+                            <div className="w-full">
+                              <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">
+                                Contacts
+                              </h3>
+                              <ul className="mt-3 text-sm text-slate-700 space-y-2">
+                                <li className="flex flex-col md:flex-row items-start md:gap-2">
+                                  <span className="font-medium text-slate-500 w-20">
+                                    Email
+                                  </span>
+                                  <span className="text-primary" style={{wordBreak:"break-word"}}>{values.email || "—"}</span>
+                                </li>
+                                <li className="flex flex-col md:flex-row items-start md:gap-2">
+                                  <span className="font-medium text-slate-500 w-20">
+                                    Phone
+                                  </span>
+                                  <span className="text-primary" style={{wordBreak:"break-word"}}>
+                                    {values.phoneCode} {values.phone || "—"}
+                                  </span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <span className="font-medium text-slate-500 w-20">
+                                    Location
+                                  </span>
+                                  <span>
+                                    {uniqueCountries.find(
+                                      (c) =>
+                                        c.countryID == values.location?.country
+                                    )?.countryName || "—"}
+                                    {values.location?.city
+                                      ? `, ${
+                                          uniqueCities.find(
+                                            (c) =>
+                                              c.cityID == values.location?.city
+                                          )?.cityName
+                                        }`
+                                      : ""}
+                                  </span>
+                                </li>
+                                <li className="flex items-start gap-2 justify-center">
+                                  {
+                                    <span className="font-medium text-slate-500 w-20">
+                                      {values?.location?.address || "—"}
+                                    </span>
+                                  }
+                                </li>
+                                <li className="flex flex-col md:flex-row items-start md:gap-2">
+                                  <span className="font-medium text-slate-500 w-20">
+                                    linkedin
+                                  </span>
+                                  <a
+                                    href={values.linkedin || "#"}
+                                    target="_blanck"
+                                    style={{wordBreak:"break-word"}}
+                                    className={`${values.linkedin ?"text-primary underline":""}`}
+                                  >
+                                    {values.linkedin || "—"}
+                                  </a>
+                                </li>
+                                <li className="flex flex-col md:flex-row items-start md:gap-2">
+                                  <span className="font-medium text-slate-500 w-20">
+                                    github
+                                  </span>
+                                  <a
+                                    href={values.github || "#"}
+                                    target="_blanck"
+                                    style={{wordBreak:"break-word"}}
+                                    className={`${values.github ?"text-primary underline":""}`}
+                                  >
+                                    {values.github || "—"}
+                                  </a>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <span className="font-medium text-slate-500 w-20">
+                                    CV
+                                  </span>
+                                  <span>
+                                    {values.cv ? values.cv.name : "—"}
+                                  </span>
+                                </li>
 
-          {/* Contacts block */}
-          <div className="w-full">
-            <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">Contacts</h3>
-            <ul className="mt-3 text-sm text-slate-700 space-y-2">
-              <li className="flex items-start gap-2"><span className="font-medium text-slate-500 w-20">Email</span><span>{values.email || "—"}</span></li>
-              <li className="flex items-start gap-2"><span className="font-medium text-slate-500 w-20">Phone</span><span>{values.phoneCode} {values.phone || "—"}</span></li>
-              <li className="flex items-start gap-2">
-                <span className="font-medium text-slate-500 w-20">Location</span>
-                <span>
-                  {uniqueCountries.find(c => c.countryID == values.location?.country)?.countryName || "—"}
-                  {values.location?.city ? `, ${uniqueCities.find(c=>c.cityID==values.location?.city)?.cityName}` : ""}
-                </span>
-              </li>
-              <li className="flex items-start gap-2 justify-center">{<span className="font-medium text-slate-500 w-20">{values?.location?.address || "—"}</span>}</li>
-              <li className="flex items-start gap-2"><span className="font-medium text-slate-500 w-20">linkedin</span><a href={values.linkedin || "#"} target="_blanck" className="text-primary underline">{values.linkedin || "—"}</a></li>
-              <li className="flex items-start gap-2"><span className="font-medium text-slate-500 w-20">github</span><a href={values.github || "#"} target="_blanck" className="text-primary underline">{values.github || "—"}</a></li>
+                                <li className="flex items-start gap-2">
+                                  <span className="font-medium text-slate-500 w-20">
+                                    Social status
+                                  </span>
+                                  <span>
+                                    {values.socialStatus ? socials.find((s) => s.personalSocialId == values.socialStatus)?.personalSocialName : "—"}
+                                  </span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <span className="font-medium text-slate-500 w-20">
+                                    Gender
+                                  </span>
+                                  <span>
+                                    {values.gender ? genders.find((s) => s.personalGenderId == values.gender)?.personalGenderName : "—"}
+                                  </span>
+                                </li>
+                              </ul>
+                            </div>
 
-              <li className="flex items-start gap-2"><span className="font-medium text-slate-500 w-20">CV</span><span>{values.cv ? values.cv.name : "—"}</span></li>
-            </ul>
-          </div>
+                            <hr className="my-5 border-slate-200 w-full" />
 
-          <hr className="my-5 border-slate-200 w-full" />
+                            {/* Awards (only rendered if data exists) */}
+                            {/* {values.awards && values.awards.length > 0 && (
+                              <div className="w-full">
+                                <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">
+                                  Awards
+                                </h3>
+                                <ul className="mt-3 text-sm text-slate-700 space-y-3">
+                                  {values.awards.map((a, idx) => (
+                                    <li key={idx}>
+                                      <div className="text-sm font-medium">
+                                        {a.title}
+                                      </div>
+                                      <div className="text-xs text-slate-500">
+                                        {a.year || "—"}
+                                      </div>
+                                    </li>
+                                  ))}
+                                </ul>
+                                <hr className="my-5 border-slate-200 w-full" />
+                              </div>
+                            )} */}
 
-          {/* Awards (only rendered if data exists) */}
-          {values.awards && values.awards.length > 0 && (
-            <div className="w-full">
-              <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">Awards</h3>
-              <ul className="mt-3 text-sm text-slate-700 space-y-3">
-                {values.awards.map((a, idx) => (
-                  <li key={idx}>
-                    <div className="text-sm font-medium">{a.title}</div>
-                    <div className="text-xs text-slate-500">{a.year || "—"}</div>
-                  </li>
-                ))}
-              </ul>
-              <hr className="my-5 border-slate-200 w-full" />
-            </div>
-          )}
+                            {/* Skills (visual bars) */}
+                            {/* {values.skills && values.skills.length > 0 && (
+                              <div className="w-full">
+                                <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">
+                                  Skills
+                                </h3>
+                                <ul className="mt-3 space-y-3">
+                                  {values.skills.map((s, idx) => (
+                                    <li key={idx} className="text-sm">
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-slate-700">
+                                          {s.name}
+                                        </span>
+                                        <span className="text-xs text-slate-500">
+                                          {s.level ? `${s.level}%` : ""}
+                                        </span>
+                                      </div>
+                                      <div className="mt-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                        <div
+                                          className="h-2 rounded-full bg-primary"
+                                          style={{
+                                            width: s.level
+                                              ? `${s.level}%`
+                                              : "30%",
+                                          }}
+                                        />
+                                      </div>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )} */}
+                          </div>
+                        </aside>
 
-          {/* Skills (visual bars) */}
-          {values.skills && values.skills.length > 0 && (
-            <div className="w-full">
-              <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">Skills</h3>
-              <ul className="mt-3 space-y-3">
-                {values.skills.map((s, idx) => (
-                  <li key={idx} className="text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-700">{s.name}</span>
-                      {/* optional numeric indicator if available */}
-                      <span className="text-xs text-slate-500">{s.level ? `${s.level}%` : ""}</span>
-                    </div>
-                    <div className="mt-1 h-2 bg-slate-200 rounded-full overflow-hidden">
-                      <div
-                        className="h-2 rounded-full bg-primary"
-                        style={{ width: s.level ? `${s.level}%` : "30%" }}
-                      />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      </aside>
+                        {/* RIGHT COLUMN - main CV content */}
+                        <main className="col-span-8 border-l border-slate-200 pl-8">
+                          {/* Name + Title row */}
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h1 className="text-3xl leading-tight font-extrabold">
+                                <span className="text-slate-900">
+                                  {values.firstName || ""}{" "}
+                                  {values.middleName || ""}
+                                </span>{" "}
+                                <span className="text-primary">
+                                  {values.lastName || ""}
+                                </span>
+                              </h1>
+                              <p className="text-lg text-slate-600 mt-1">
+                                {values.position
+                                  ? jobs.find((j) => j.jopId == values.position)
+                                      ?.jopName
+                                  : "—"}
+                                {" - "}
+                                {values.department
+                                  ? departments.find(
+                                      (d) => d.departmentId == values.department
+                                    )?.departmentName
+                                  : "—"}
+                              </p>
+                            </div>
 
-      {/* RIGHT COLUMN - main CV content */}
-      <main className="col-span-8 border-l border-slate-200 pl-8">
-        {/* Name + Title row */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-3xl leading-tight font-extrabold">
-              <span className="text-slate-900">{values.firstName || ""} {values.middleName || ""}</span>
-              {" "}
-              <span className="text-primary">{values.lastName || ""}</span>
-            </h1>
-            <p className="text-lg text-slate-600 mt-1">
-              {values.position ? jobs.find(j => j.jopId == values.position)?.jopName : "—"}
-              {" - "}
-              {values.department ? departments.find(d => d.departmentId == values.department)?.departmentName : "—"}
-            </p>
-          </div>
+                            {/* small contact column on right (optional) */}
+                            {/* <div className="text-sm text-slate-500">
+                              <div>{values.email || ""}</div>
+                              <div className="mt-1">
+                                {values.phoneCode} {values.phone || ""}
+                              </div>
+                            </div> */}
+                          </div>
 
-          {/* small contact column on right (optional) */}
-          <div className="text-sm text-slate-500">
-            <div>{values.email || ""}</div>
-            <div className="mt-1">{values.phoneCode} {values.phone || ""}</div>
-          </div>
-        </div>
+                          <hr className="my-4 border-slate-200" />
 
-        <hr className="my-4 border-slate-200" />
+                          {/* Profile / Summary */}
+                          <section className="mb-6">
+                            <h2 className="text-sm font-semibold text-primary uppercase tracking-wide mb-2">
+                              Why should we hire you?
+                            </h2>
+                            <p className="text-sm text-slate-700 leading-relaxed">
+                              {values.cover || "—"}
+                            </p>
+                          </section>
 
-        {/* Profile / Summary */}
-        <section className="mb-6">
-          <h2 className="text-sm font-semibold text-primary uppercase tracking-wide mb-2">Profile</h2>
-          <p className="text-sm text-slate-700 leading-relaxed">
-            {values.cover|| "—" }
-          </p>
-        </section>
+                          <hr className="my-4 border-slate-200" />
 
-        <hr className="my-4 border-slate-200" />
+                          {/* Education */}
+                          <section className="mb-6">
+                            <h2 className="text-sm font-semibold text-primary uppercase tracking-wide mb-3">
+                              Education
+                            </h2>
+                            <div className="space-y-4 text-sm text-slate-700">
+                              {values.education &&
+                              values.education.length > 0 ? (
+                                values.education.map((ed, i) => (
+                                  <div
+                                    key={i}
+                                    className="flex justify-between items-start"
+                                  >
+                                    <div>
+                                      <div className="font-medium">
+                                        {ed.institution || "—"}
+                                      </div>
+                                      <div className="text-xs text-slate-500">
+                                        {ed.degree || "—"}
+                                      </div>
+                                    </div>
+                                    <div className="text-xs text-slate-500">
+                                      {ed.year || "—"}
+                                    </div>
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="text-sm text-slate-500">—</div>
+                              )}
+                            </div>
+                          </section>
 
-        {/* Education */}
-        <section className="mb-6">
-          <h2 className="text-sm font-semibold text-primary uppercase tracking-wide mb-3">Education</h2>
-          <div className="space-y-4 text-sm text-slate-700">
-            {values.education && values.education.length > 0 ? (
-              values.education.map((ed, i) => (
-                <div key={i} className="flex justify-between items-start">
-                  <div>
-                    <div className="font-medium">{ed.institution || "—"}</div>
-                    <div className="text-xs text-slate-500">{ed.degree || "—"}</div>
-                  </div>
-                  <div className="text-xs text-slate-500">{ed.year || "—"}</div>
-                </div>
-              ))
-            ) : (
-              <div className="text-sm text-slate-500">—</div>
-            )}
-          </div>
-        </section>
+                          <hr className="my-4 border-slate-200" />
 
-        <hr className="my-4 border-slate-200" />
+                          {/* Work Experience */}
+                          <section className="mb-6">
+                            <h2 className="text-sm font-semibold text-primary uppercase tracking-wide mb-3">
+                              Work Experience
+                            </h2>
+                            <div className="space-y-6 text-sm text-slate-700">
+                              {values.experiences &&
+                              values.experiences.length > 0 ? (
+                                values.experiences.map((e, idx) => (
+                                  <div key={idx}>
+                                    <div className="flex justify-between items-start">
+                                      <div>
+                                        <div className="font-medium">
+                                          {e.company || "—"}
+                                        </div>
+                                        <div className="text-xs text-slate-500">
+                                          {e.role || "—"}
+                                        </div>
+                                      </div>
+                                      <div className="text-xs text-slate-500">
+                                        {e.years+ " — " + (values.experiences[idx+1]?.years || "present")}
+                                      </div>
+                                    </div>
+                                    {e.description && (
+                                      <p className="mt-2 text-sm text-slate-600">
+                                        {e.description}
+                                      </p>
+                                    )}
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="text-sm text-slate-500">—</div>
+                              )}
+                            </div>
+                          </section>
 
-        {/* Work Experience */}
-        <section className="mb-6">
-          <h2 className="text-sm font-semibold text-primary uppercase tracking-wide mb-3">Work Experience</h2>
-          <div className="space-y-6 text-sm text-slate-700">
-            {values.experiences && values.experiences.length > 0 ? (
-              values.experiences.map((e, idx) => (
-                <div key={idx}>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="font-medium">{e.company || "—"}</div>
-                      <div className="text-xs text-slate-500">{e.role || "—"}</div>
-                    </div>
-                    <div className="text-xs text-slate-500">{e.years ? `${e.years} yrs` : "—"}</div>
-                  </div>
-                  {e.description && <p className="mt-2 text-sm text-slate-600">{e.description}</p>}
-                </div>
-              ))
-            ) : (
-              <div className="text-sm text-slate-500">—</div>
-            )}
-          </div>
-        </section>
-
-        <footer className="mt-10 text-xs text-slate-400">
-          SkyCulinaire — Candidate Application
-        </footer>
-      </main>
-    </div>
-  </section>
-)}
-
-
-
+                          <footer className="mt-10 text-xs text-slate-400">
+                            SkyCulinaire — Candidate Application
+                          </footer>
+                        </main>
+                      </div>
+                    </section>
+                  )}
                 </div>
 
                 {/* Wizard navigation */}
-                <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-between items-center">
+                <div className="mt-6 flex px-5 gap-3 justify-between items-center">
                   <div className="flex gap-3">
-                    {currentStep > 0 && <button type="button" onClick={() => setCurrentStep((s)=>s-1)} className="rounded-full px-5 py-2 border">Back</button>}
+                    {currentStep > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep((s) => s - 1)}
+                        className="rounded-full px-5 py-2 border"
+                      >
+                        Back
+                      </button>
+                    )}
                   </div>
 
                   <div className="flex gap-3">
                     {currentStep < steps.length - 1 && (
-                      <button type="button" onClick={async () => {
-                        const ok = await validateStepAndProceed(validateForm, values, setTouched);
-                        if (ok) setCurrentStep((s)=>s+1);
-                      }} className="rounded-full px-5 py-2 text-white font-semibold bg-primary">Next</button>
-                    )}
+  <button
+    type="button"
+    onClick={async () => {
+      const ok = await validateStepAndShowAllErrors(
+        validateForm,
+        values,
+        setTouched,
+        currentStep // Pass current step
+      );
+      if (ok) setCurrentStep((s) => s + 1);
+    }}
+    className="rounded-full px-5 py-2 text-white font-semibold bg-primary"
+  >
+    Next
+  </button>
+)}
 
                     {currentStep === steps.length - 1 ? (
-                      <button type="submit" disabled={isSubmitting} className={`rounded-full px-5 py-2 text-white font-semibold ${isSubmitting ? "bg-[#B88E5299]" : "bg-primary"}`}>
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className={`rounded-full px-5 py-2 text-white font-semibold ${
+                          isSubmitting ? "bg-[#B88E5299]" : "bg-primary"
+                        }`}
+                      >
                         {isSubmitting ? "Submitting..." : "Submit Application"}
                       </button>
                     ) : null}
 
-                    <button type="button" onClick={() => { setApiError(null); setApiSuccess(null); setSubmitted(null); /* reset form - manual */ window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full px-5 py-2 border">Reset</button>
+                    <button
+  type="button"
+  onClick={() => {
+    // 2) Clear API / UI state
+    setApiError(null);
+    setApiSuccess(null);
+    setSubmitted(null);
+    setGapPopup(false);
+    setSelectedCountry(null);
+    setSelectedCity(null);
+    setSelectedArea(null);
+
+    // 3) Reset Formik state (values, touched, errors) back to initialValues
+    //    resetForm() will reset to the Formik initialValues you provided above.
+    resetForm();
+
+    // 4) Clear DOM file inputs (allowed to set to empty string)
+    if (fileRef.current) fileRef.current.value = "";
+    if (photoRef.current) photoRef.current.value = "";
+
+    // 5) Reset stepper to first step & scroll to top
+    setCurrentStep(0);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }}
+  className="rounded-full px-5 py-2 border"
+>
+  Reset
+</button>
                   </div>
                 </div>
-
               </Form>
             </>
           )}

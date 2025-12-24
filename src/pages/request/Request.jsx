@@ -1,5 +1,9 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { motion } from "motion/react"
+import { useFormik } from 'formik'
+import * as yup from 'yup'
+import { GetCountriesCodes } from '../../assets/apis/country/Country'
+import { useQuery } from '@tanstack/react-query'
 
 const data=[
   { key: "+93", label: "Afghanistan" },
@@ -120,6 +124,61 @@ const data=[
 ]
 
 function Request() {
+  const schema = yup.object().shape({
+  mobil: yup
+    .string()
+    .required("phone number is required")
+    .matches(/^[0-9]{8,14}$/, "Phone number is not valid"),
+
+  password: yup
+    .string()
+    .required("Password is required")
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character."
+    ),
+
+  email: yup
+    .string()
+    .required("Email is required")
+    .email("Email is not valid"),
+
+  contryID: yup
+    .number()
+    .required("Required"),
+
+  companyName: yup
+    .string()
+    .required("Company name is required"),
+
+  companyPersonalName: yup
+    .string()
+    .required("Name is required"),
+});
+
+  const {data:countries,isLoading}=useQuery({queryKey:["countries"],queryFn:GetCountriesCodes})
+  useEffect(()=>{
+    console.log("data",data);
+    
+  },[data])
+  const formik = useFormik({
+    initialValues: {
+      mobil: "",
+      password: "",
+      email: "",
+      contryID: "",
+      companyName: "",
+      companyPersonalName: "",
+      subscribe: false,
+    },
+    validationSchema: schema,
+    onSubmit: (values) => {
+      console.log(values);
+    },
+  });
+   useEffect(() => {
+    window.scrollTo(0, 0);
+  })
   return (
     <div className="flex flex-col items-center gap-9 py-24 bg-light-gray-100 xl:px-50 lg:px-30 md:px-20 px-10">
         <motion.h2

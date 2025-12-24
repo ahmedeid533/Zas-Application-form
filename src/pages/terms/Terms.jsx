@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 function Terms() {
   const navigate = useNavigate();
+   useEffect(() => {
+    window.scrollTo(0, 0);
+  })
   return (
     <div>
       <div className=" flex gap-8 flex-col-reverse md:flex-row items-center xl:px-18 lg:px-12 md:px-8 px-4 bg-light-gray-100 py-24">
