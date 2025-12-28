@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react'
 import { motion } from "motion/react"
+import { useNavigate } from 'react-router-dom';
 
 function InflightMeal() {
+  const navigate = useNavigate();
    useEffect(() => {
     window.scrollTo(0, 0);
   })
@@ -22,12 +24,6 @@ function InflightMeal() {
             Sumptuous meals prepared to perfection for business flights, to
             enhance your journey.
           </p>
-          <button
-            style={{ paddingInline: "60px" }}
-            className="global-btn btn-primary px-20 text-lg"
-          >
-            Air Catering Menu
-          </button>
         </motion.div>
 
         <motion.div
@@ -67,12 +63,18 @@ function InflightMeal() {
               Our executive chefs are able and ready to cater for urgent flight
               meal requests, and their culinary expertise cover a wide variety
               of{" "}
-              <a href="#" className=" underline hover:text-primary">
+              <a onClick={() => {
+    navigate("/");
+    setTimeout(() => {
+      const el = document.getElementById("work");
+      el?.scrollIntoView( { behavior: "smooth"});
+    }, 100);
+  }} className=" underline hover:text-primary">
                 cooking cuisines
               </a>{" "}
               . From Asian, to French cuisine, Mediterranean to Egyptian cooking
               and much more. Our clients need only to choose from our{" "}
-              <a href="#" className=" underline hover:text-primary">
+              <a onClick={() => navigate("/menu")} className=" underline hover:text-primary">
                 food menu
               </a>{" "}
               , and we will cater for the rest, including dietary requirements,
@@ -99,7 +101,7 @@ function InflightMeal() {
             <p className="mt-4 mb-6 text-white leading-8 text-lg">
               We specialise in catering for VIP private jets, and take pride in
               serving our food on executive business flights. Our in-flight {" "}
-              <a href="#" className=" underline hover:text-primary">
+              <a onClick={() => navigate("/private-jet-aircatering-cairo")} className=" underline hover:text-primary">
                 air catering
               </a>{" "} adheres to stringent cooking methods at specific
               temperatures, at our highly hygienic catering facility near Cairo

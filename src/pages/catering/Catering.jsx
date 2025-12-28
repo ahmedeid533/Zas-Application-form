@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react'
 import { motion } from "motion/react"
+import { useNavigate } from 'react-router-dom';
 
 function Catering() {
+  const Navigate = useNavigate();
    useEffect(() => {
     window.scrollTo(0, 0);
   })
@@ -25,6 +27,7 @@ function Catering() {
           <button
             style={{ paddingInline: "60px" }}
             className="global-btn btn-primary px-20 text-lg"
+            onClick={() => Navigate("/menu")}
           >
             Air Catering Menu
           </button>
@@ -61,13 +64,13 @@ function Catering() {
         <p>
           We understand the conditions of private jets, and need for luxury
           aviation {" "}
-              <a href="#" className=" underline hover:text-primary">
+              <a onClick={()=>Navigate("/inflight-meal-catering-egypt")} className=" underline hover:text-primary">
                 in-flight meals
               </a>{" "}. Whether a top executive flight on a
           privately operated plane, a football team's big cabin aircraft, a
           chartered flight for a family holiday, or other air travel situations.
           We are here to assist you with the finest {" "}
-              <a href="#" className=" underline hover:text-primary">
+              <a onClick={()=>Navigate("/inflight-meal-catering-egypt")} className=" underline hover:text-primary">
                 in-flight catering
               </a>{" "}
         </p>
@@ -75,7 +78,7 @@ function Catering() {
           Strategically located near Cairo International Airport in Egypt, we
           are always at hand to serve private jets landing and departing. All we
           require is your in-flight meal choice from our air {" "}
-              <a href="#" className=" underline hover:text-primary">
+              <a onClick={()=>Navigate("/menu")} className=" underline hover:text-primary">
                  catering menu
               </a>{" "} and
           dietary requirements, if any. Private jet air catering within 24 hours

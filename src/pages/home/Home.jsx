@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react'
 import { motion } from "motion/react"
+import { useNavigate } from 'react-router-dom';
 function Home() {
+  const navigate = useNavigate();
   useEffect(() => {
     window.scrollTo(0, 0);
   })
@@ -25,6 +27,7 @@ function Home() {
           <button
             style={{ paddingInline: "60px" }}
             className="global-btn btn-primary px-20 text-lg"
+            onClick={() => navigate("/menu")}
           >
             View Catering Menu
           </button>
@@ -66,7 +69,7 @@ function Home() {
               Our executive chefs focus on small-batch, made-from-scratch
               cooking, with the most of ingredients procured only as requested.
               Your{" "}
-              <a href="#" className=" underline hover:text-primary">
+              <a onClick={() => navigate("/inflight-meal-catering-egypt")} className=" underline hover:text-primary">
                 in-flight catering
               </a>{" "}
               orders are made from high-quality, fresh, seasonal ingredients
@@ -94,11 +97,11 @@ function Home() {
             </h2>
             <p className="mt-4 mb-6 text-white leading-8 text-lg">
               With Sky Culinaire, the priority of each of our{" "}
-              <a href="#" className=" underline hover:text-primary">
+              <a onClick={()=>navigate("/menu")} className=" underline hover:text-primary">
                 food menu
               </a>{" "}
               offerings is on culinary excellence.{" "}
-              <a href="#" className=" underline hover:text-primary">
+              <a onClick={()=>navigate("/private-jet-aircatering-cairo")} className=" underline hover:text-primary">
                 Air catering for private jets,
               </a>{" "}
               , we continue to deliver the finest quality goods and services
@@ -224,6 +227,7 @@ function Home() {
           <button
             style={{ padding: "8px 100px" }}
             className="global-btn btn-primary text-lg"
+            onClick={() => navigate("/menu")}
           >
             Catering Menu
           </button>
@@ -247,7 +251,7 @@ function Home() {
               Culinaire Worldwide Network's global range of built and operated
               kitchens, as well as an increasing range of air catering partners.
               Our{" "}
-              <a href="#" className=" underline hover:text-primary">
+              <a href="#" className=" underline hover:text-primary" onClick={()=>navigate("/inflight-meal-catering-egypt")}>
                 in-flight catering staff
               </a>{" "}
               is standing by to assist you.

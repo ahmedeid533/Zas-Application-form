@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { motion } from "motion/react"
+import { useNavigate } from 'react-router-dom';
 
 
 function About() {
+  const navigate=useNavigate();
    useEffect(() => {
     window.scrollTo(0, 0);
   })
@@ -68,7 +70,7 @@ Our culinary artisans craft gastronomic masterpieces, elevating inflight dining 
 We embody the pinnacle of hospitality, providing personalized and attentive service that surpasses expectations.                  </p>
                   <p className="mt-4 mb-6 text-white leading-6 tracking-widest ">
                     <span className='font-bold'>Flexibility and Elegance</span><br/>
-Our customised menus and seamless catering solutions epitomize luxury and sophistication, catering to the diverse tastes and preferences of our esteemed clients.                  </p>
+Our customised <a onClick={()=>navigate("/menu")} className='underline hover:text-primary'> menus </a> and seamless catering solutions epitomize luxury and sophistication, catering to the diverse tastes and preferences of our esteemed clients.                  </p>
                   <p className="mt-4 mb-6 text-white leading-6 tracking-widest ">
                     <span className='font-bold'>Safety and Compliance</span><br/>
 Sky Culinaire is ISO-certified and adheres to the strictest safety regulations, ensuring unparalleled food safety and compliance with international standards.

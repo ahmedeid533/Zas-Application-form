@@ -304,6 +304,7 @@ export default function ApplyingForm() {
   const [selectedCity, setSelectedCity] = useState(null);
   const [selectedArea, setSelectedArea] = useState(null);
   const [gapPopup, setGapPopup] = useState(false);
+  const [serial, setSerial] = useState(null);
 
   const { data: departments } = useQuery({ queryKey: ["departments"], queryFn: GetDepartments });
   const { data: jobs } = useQuery({ queryKey: ["jobs"], queryFn: GetJobs });
@@ -919,7 +920,7 @@ const handleStepClick = async (targetIndex, validateForm, values, setTouched) =>
       <IoCheckmarkSharp className="text-[300px] text-green-500"/>
       <p className="text-3xl font-bold">Thank You!</p>
       <p className="sm:text-2xl text-xl">Your application was successfully submitted</p>
-      <p className="text-xl text-gray-600">you will recive an email soon with a serial number</p>
+      <p className="text-xl text-gray-600">you will recive an email soon with this serial number<br/> <b>{serial}</b></p>
     </div>
   );
 
@@ -991,6 +992,9 @@ const handleStepClick = async (targetIndex, validateForm, values, setTouched) =>
               const data = await res.json().catch(() => null);
               if (res.ok) {
                 setApiSuccess(true);
+                setSerial(data?.personalCvSequanceNumber);
+                
+                
                 const summary = { ...values };
                 if (values.cv)
                   summary.cv = { name: values.cv.name, size: values.cv.size };

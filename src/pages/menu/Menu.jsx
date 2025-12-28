@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IoMdArrowDropdown } from "react-icons/io";
 import { IoLockClosedSharp } from "react-icons/io5";
+import useAuthStore from '../../assets/store/authStore';
 
 const links = [
   { name: "Home", path: "/" },
@@ -89,7 +90,7 @@ function CustomDropdown({
 
 /* ---------- Menu Component ---------- */
 function Menu() {
-  const isLogin = true;
+  const {user:isLogin,logout}=useAuthStore();
   const [index, setIndex] = useState(0);
 
   // openDropdown controls which dropdown is open: 'main' | 'sub' | 'station' | null
@@ -230,9 +231,21 @@ function Menu() {
       <div className="relative z-10 ">
         <div className="flex justify-end p-6">
           <div className="flex items-center gap-3 rounded-full bg-[#02020280] text-white p-3 px-5">
+            {isLogin && (
+              <>
+              <p className='text-primary transition-all duration-300'>{isLogin?.firstName}</p>
+            <span>|</span>
+              </>
+            )}
             <button onClick={() => navigate("/")} className='text-primary hover:text-[#d9b27a] transition-all duration-300'>Home</button>
             <span>|</span>
-            <button onClick={() => navigate("/login")} className='text-primary hover:text-[#d9b27a] transition-all duration-300'>Login</button>
+            {isLogin?(
+              <button onClick={() => {logout();navigate("/")}} className='text-primary hover:text-[#d9b27a] transition-all duration-300'>Logout</button>
+
+            ):(
+
+              <button onClick={() => navigate("/login")} className='text-primary hover:text-[#d9b27a] transition-all duration-300'>Login</button>
+            )}
           </div>
         </div>
 
@@ -242,7 +255,7 @@ function Menu() {
           </div>
           <h2 className='text-4xl text-white text-center'>OUR FOOD <span className='text-primary font-bold'>MENU</span></h2>
           <p className='text-white text-center text-lg'>To gain complete access to the food menu and its prices, kindly fill out the form below if you wish to view and have access to it.</p>
-          <button className="global-btn bg-primary  hover:bg-inherit">Full menu request</button>
+          <button className="global-btn bg-primary  hover:bg-inherit" onClick={() => navigate("/request")}>Full menu request</button>
         </div>
 
         <div className="">

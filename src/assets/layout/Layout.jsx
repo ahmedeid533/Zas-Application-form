@@ -4,7 +4,7 @@ import { lazy, Suspense, useEffect } from "react";
 // import Footer from "./Footer";
 // import Home from "../../pages/home/Home";
 import Loading from "../../pages/loading/Loading";
-// import ApplyingForm from "../../pages/ApplyingForm/ApplyingForm";
+import ApplyingForm from "../../pages/ApplyingForm/ApplyingForm";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import Home from "../../pages/home/Home";
@@ -16,7 +16,10 @@ import PrivacyPolicy from "../../pages/privacyPolicy/privacyPolicy";
 import Terms from "../../pages/terms/Terms";
 import Menu from "../../pages/menu/Menu";
 import Request from "../../pages/request/Request";
-import ApplyingFormMultiFormik from "../../pages/ApplyingForm/ApplyingForm";
+import useCheckAuthUser from "../apis/auth/useCheckAuthUser";
+import Login from "../../pages/login/Login";
+import { IoIosArrowUp } from "react-icons/io";
+
 
 function Main() {
 
@@ -49,12 +52,12 @@ function Main() {
 // };
 
 
-// function AuthChecker() {
-//     // 🔥 هنا يتم استدعاء الهوك الذي يحتاج سياق Router
-//     useCheckAuthUser();
-//     // Outlet يعرض محتوى المسار الفعلي (Home, Cart, إلخ)
-//     return <Outlet />;
-// }
+function AuthChecker() {
+    // 🔥 هنا يتم استدعاء الهوك الذي يحتاج سياق Router
+    useCheckAuthUser();
+    // Outlet يعرض محتوى المسار الفعلي (Home, Cart, إلخ)
+    return <Outlet />;
+}
 
 function Layout() {
 
@@ -82,25 +85,29 @@ function Layout() {
 // }, []);
 
   const routes = [
-    {
-      path: "/",
-      element: <Main />,
-      children: [
-        { index: true, element: <Home /> },
-        {path:"/private-jet-aircatering-cairo",element:<Catering/>},
-        {path:"/inflight-meal-catering-egypt",element:<InflightMeal/>},
-        {path:"/air-catering-cairo-contact",element:<Contact/>},
-        {path:"/about-us",element:<About/>},
-        {path:"/privacy-policy",element:<PrivacyPolicy/>},
-        {path:"/website-terms",element:<Terms/>},
-        {path:"/request",element:<Request/>},
-        {
+    {path:"/",element:<AuthChecker/> ,children:[
+
+      {
+        path: "/",
+        element: <Main />,
+        children: [
+          { index: true, element: <Home /> },
+          {path:"/private-jet-aircatering-cairo",element:<Catering/>},
+          {path:"/inflight-meal-catering-egypt",element:<InflightMeal/>},
+          {path:"/air-catering-cairo-contact",element:<Contact/>},
+          {path:"/about-us",element:<About/>},
+          {path:"/privacy-policy",element:<PrivacyPolicy/>},
+          {path:"/website-terms",element:<Terms/>},
+          {path:"/request",element:<Request/>},
+          {
             path:"/job-application",
-            element:<ApplyingFormMultiFormik/>
+            element:<ApplyingForm/>
           }
         ],
       },
       {path:"/menu",element:<Menu/>},
+      {path:"/login",element:<Login/>},
+    ]},
   ];
   const handleRouterError = (error) => {
     console.error("Router encountered an error:", error);
@@ -120,11 +127,18 @@ function Layout() {
     onError: handleRouterError,
   });
 
+  function scrollTop(){
+    window.scrollTo(0,0);
+  }
+
   return (
     <Suspense
      fallback={<Loading fullScreen={true} />}
      >
       <RouterProvider router={router} />
+      <div onClick={scrollTop} className="flex items-center justify-center fixed end-9 bottom-9 w-12 h-12 bg-primary text-white rounded-xl opacity-75 hover:opacity-100 transition cursor-pointer">
+        <IoIosArrowUp className="text-2xl"/>
+      </div>
     </Suspense>
   );
 }

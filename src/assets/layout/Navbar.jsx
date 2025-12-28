@@ -3,9 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useScreenViewStore } from "../store/screenViewStore";
 import { HiBars3 } from "react-icons/hi2";
 import { IoClose } from "react-icons/io5";
+import useAuthStore from "../store/authStore";
 
 
 function Navbar() {
+    const {user,logout}=useAuthStore();
+
   const {setNavBarHeight}=useScreenViewStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -40,6 +43,8 @@ useEffect(() => {
     setIsBgActive(false);
   }
 }, [isMenuOpen]);
+console.log(user);
+
 
 
   return (
@@ -137,8 +142,11 @@ useEffect(() => {
 `} onClick={()=>{navigate("/job-application")}}>
    JOIN US
 </a>
-<button className="global-btn btn-secondary" onClick={()=>{navigate("/login")}}>login</button>
-<button className="global-btn btn-primary" onClick={()=>{navigate("/menu")}}>food menu</button>
+{user ? (
+  <button className={`global-btn btn-secondary`} onClick={()=>{logout();}}>LOGOUT</button>
+):(
+<button onClick={()=>navigate("/login")} className="global-btn btn-secondary">login</button>
+    )}<button className="global-btn btn-primary" onClick={()=>{navigate("/menu")}}>food menu</button>
         </div>
           </div>
           </div>
@@ -181,13 +189,18 @@ useEffect(() => {
   }}>
    CONTACT
 </a>
-<a className={`
+  <a className={`
     text-white text-xl hover:text-primary cursor-pointer duration-200
-
-`} onClick={()=>{navigate("/job-application");setIsMenuOpen(false)}}>
-   JOIN US
-</a>
-<button className="global-btn btn-secondary">login</button>
+    
+    `} onClick={()=>{navigate("/job-application");
+      setIsMenuOpen(false)}}>
+      JOIN US
+      </a>
+{user ? (
+  <button className={`global-btn btn-secondary`} onClick={()=>{logout();}}>LOGOUT</button>
+):(
+<button onClick={()=>navigate("/login")} className="global-btn btn-secondary">login</button>
+    )}
 <button className="global-btn btn-primary" onClick={()=>{navigate("/menu");setIsMenuOpen(false)}}>food menu</button>
             </div>
           </div>
