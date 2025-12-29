@@ -1858,7 +1858,7 @@ const handleStepClick = async (targetIndex, validateForm, values, setTouched) =>
                                       <div className="md:col-span-3">
                                         <Field
                                           name={`experiences.${idx}.years`}
-                                          placeholder="start year"
+                                          placeholder="Start year"
                                           className="w-full rounded-full border border-gray-200 px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none"
                                         />
                                         <ErrorMessage
