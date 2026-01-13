@@ -105,7 +105,7 @@ function Menu() {
   const [selectedSubId, setSelectedSubId] = useState(null);
    useEffect(() => {
     window.scrollTo(0, 0);
-  })
+  },[])
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["menu"],

@@ -6,7 +6,7 @@ function InflightMeal() {
   const navigate = useNavigate();
    useEffect(() => {
     window.scrollTo(0, 0);
-  })
+  },[])
   return (
     <div>
       <div className=" flex gap-5 flex-col-reverse md:flex-row items-center px-18 bg-light-gray-100 py-24">

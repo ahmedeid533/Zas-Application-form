@@ -84,9 +84,9 @@ export function DeleteDepartment(id, data) {
     });
 }
 
-export function GetJobs() {
+export function GetJobs(DepartmentId) {
   return axiosInstance
-    .get("/api/CV/CVGeneralSelection/Jops")
+    .get(`/api/CV/CVGeneralSelection/Jops?DepartmentId=${DepartmentId}`)
     .then((response) => {
       //console.log(response);
       return response.data;

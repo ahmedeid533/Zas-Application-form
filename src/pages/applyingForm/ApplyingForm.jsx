@@ -305,9 +305,10 @@ export default function ApplyingForm() {
   const [selectedArea, setSelectedArea] = useState(null);
   const [gapPopup, setGapPopup] = useState(false);
   const [serial, setSerial] = useState(null);
+  const [departmentId, setDepartmentId] = useState(0);
 
-  const { data: departments } = useQuery({ queryKey: ["departments"], queryFn: GetDepartments });
-  const { data: jobs } = useQuery({ queryKey: ["jobs"], queryFn: GetJobs });
+  const { data: departments } = useQuery({ queryKey: ["departments"], queryFn:GetDepartments });
+  const { data: jobs } = useQuery({ queryKey: ["jobs", departmentId], queryFn:()=> GetJobs(departmentId) });
   const { data: socials } = useQuery({ queryKey: ["socials"], queryFn: GetSocials });
   const { data: genders } = useQuery({ queryKey: ["genders"], queryFn: GetGenders });
   const { data: countries } = useQuery({ queryKey: ["countries"], queryFn: GetCountries });
@@ -315,7 +316,11 @@ export default function ApplyingForm() {
 
    useEffect(() => {
     window.scrollTo(0, 0);
-  })
+  },[])
+  useEffect(() => {
+    console.log("departmentId",departmentId);
+    
+  },[departmentId])
 
   const getUniqueItems = (data, key) => {
     const arr = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : []);
@@ -1692,6 +1697,12 @@ const handleStepClick = async (targetIndex, validateForm, values, setTouched) =>
                         <Field
                           as="select"
                           name="department"
+                          onChange={(e) => {
+                            setDepartmentId(e.target.value);
+                            // setPositions([]);
+                            setFieldValue("department", e.target.value);
+                            setFieldValue("position", "");
+                          }}
                           className={`w-full rounded-full border px-4 py-2 pr-10 text-sm ${
                             errors.department && touched.department
                               ? "border-danger"
@@ -1729,8 +1740,9 @@ const handleStepClick = async (targetIndex, validateForm, values, setTouched) =>
                         </label>
                         <Field
                           as="select"
+                          disabled={!values.department}
                           name="position"
-                          className={`w-full rounded-full border px-4 py-2 pr-10 text-sm ${
+                          className={`w-full rounded-full ${!values.department && "disabled opacity-50"} border px-4 py-2 pr-10 text-sm ${
                             errors.position && touched.position
                               ? "border-danger"
                               : "border-gray-200"
