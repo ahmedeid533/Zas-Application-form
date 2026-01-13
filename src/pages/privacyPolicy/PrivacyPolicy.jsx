@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 function PrivacyPolicy() {
    useEffect(() => {
     window.scrollTo(0, 0);
-  })
+  },[])
   return (
     <div>
       <div className=" flex gap-8 flex-col-reverse md:flex-row items-center xl:px-18 lg:px-12 md:px-8 px-4 bg-light-gray-100 py-24">

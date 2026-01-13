@@ -64,7 +64,7 @@ function Request() {
   });
    useEffect(() => {
     window.scrollTo(0, 0);
-  })
+  },[])
   return (
     <div className="flex flex-col items-center gap-9 py-24 bg-light-gray-100 xl:px-50 lg:px-30 md:px-20 px-10">
         <motion.h2

@@ -136,7 +136,7 @@ function Layout() {
      fallback={<Loading fullScreen={true} />}
      >
       <RouterProvider router={router} />
-      <div onClick={scrollTop} className="flex items-center justify-center fixed end-9 bottom-9 w-12 h-12 bg-primary text-white rounded-xl opacity-75 hover:opacity-100 transition cursor-pointer">
+      <div onClick={scrollTop} className="flex items-center justify-center fixed end-9 bottom-9 w-12 h-12 bg-primary text-white rounded-xl opacity-75 hover:opacity-100 transition cursor-pointer z-50">
         <IoIosArrowUp className="text-2xl"/>
       </div>
     </Suspense>
