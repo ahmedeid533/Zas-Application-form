@@ -91,22 +91,23 @@ function Layout() {
         path: "/",
         element: <Main />,
         children: [
-          { index: true, element: <Home /> },
-          {path:"/private-jet-aircatering-cairo",element:<Catering/>},
-          {path:"/inflight-meal-catering-egypt",element:<InflightMeal/>},
-          {path:"/air-catering-cairo-contact",element:<Contact/>},
-          {path:"/about-us",element:<About/>},
-          {path:"/privacy-policy",element:<PrivacyPolicy/>},
-          {path:"/website-terms",element:<Terms/>},
-          {path:"/request",element:<Request/>},
+          // { index: true, element: <Home /> },
+          // {path:"/private-jet-aircatering-cairo",element:<Catering/>},
+          // {path:"/inflight-meal-catering-egypt",element:<InflightMeal/>},
+          // {path:"/air-catering-cairo-contact",element:<Contact/>},
+          // {path:"/about-us",element:<About/>},
+          // {path:"/privacy-policy",element:<PrivacyPolicy/>},
+          // {path:"/website-terms",element:<Terms/>},
+          // {path:"/request",element:<Request/>},
           {
-            path:"/job-application",
-            element:<ApplyingForm/>
+						path: "/", //job-application form
+						index: true,
+						element:<ApplyingForm/>
           }
         ],
       },
-      {path:"/menu",element:<Menu/>},
-      {path:"/login",element:<Login/>},
+      // {path:"/menu",element:<Menu/>},
+      // {path:"/login",element:<Login/>},
     ]},
   ];
   const handleRouterError = (error) => {

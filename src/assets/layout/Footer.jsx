@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { useScreenViewStore } from '../store/screenViewStore';
 import { IoIosMail } from "react-icons/io";
-import { FaPhoneAlt } from "react-icons/fa";
+import { FaAddressBook, FaLandmark, FaLocationArrow, FaPhoneAlt } from "react-icons/fa";
 import { FaFacebook } from "react-icons/fa";
 import { FaInstagram } from "react-icons/fa";
 import { FaLinkedin } from "react-icons/fa";
@@ -59,42 +59,77 @@ function Footer() {
       setFooterHeight(ref.current.offsetHeight);
       }, [ref]);
   return (
-    <div ref={ref} className="bg-[#201F1F] px-20 py-20">
-      <div className="flex flex-col md:flex-row justify-between gap-9">
-        <div className="text-white">
-          <div className="flex items-center gap-3">
-            <IoIosMail className="text-primary text-3xl" />{" "}
-            <p>sales@skyculinaire.com</p>
-          </div>
-          <div className="mt-8">
-            <div className="flex items-center gap-3 mb-2">
-              <FaPhoneAlt className="text-primary text-2xl" />{" "}
-              <p> +20 1066668178</p>
-            </div>
-            <p> (+202) 22693134/ 22693135/ 22693136</p>
-          </div>
-        </div>
-        <div className="">
-          <p className="text-center text-white text-xl mb-4">Follow Our Socials</p>
-          <div className="flex items-center justify-center gap-8">
-            <a href="https://www.facebook.com/profile.php?id=100063803803378" className='text-primary text-3xl hover:text-white transition-all duration-300'>
-              <FaFacebook className="" />
-            </a>
-            <a href="#" className='text-primary text-3xl hover:text-white transition-all duration-300'>
-              <FaInstagram className="" />
-            </a>
-            <a href="https://www.linkedin.com/company/z-aviation-services-zas" className='text-primary text-3xl hover:text-white transition-all duration-300'>
-              <FaLinkedin className="" />
-            </a>
-          </div>
-        </div>
-        <div className="flex justify-center h-20 gap-5">
-          <img src="images/catering-certification-ISO-22000-skyculinaire.png" className='h-full' alt="" />
-          <img src="images/EGAC-accredtied-sky-culinaire-aviation-catering.png" className='h-full' alt="" />
-          <img src="images/International-Accreditation-Forum-skyculinaire.png" className='h-full' alt="" />
-        </div>
-      </div>
-      <div className="flex flex-wrap justify-center gap-4 mt-12">
+		<div ref={ref} className="bg-[#201F1F] px-20 py-20">
+			<div className="flex flex-col md:flex-row justify-between gap-9">
+				<div className="text-white">
+					<div className="flex items-center gap-3">
+						<IoIosMail className="text-primary text-3xl" />{" "}
+						<p>ops@zasair.com</p>
+					</div>
+					<div className="mt-8">
+						<div className="flex items-center gap-3 mb-2">
+							<FaPhoneAlt className="text-primary text-2xl" />{" "}
+							<p> (+202) 22687914</p>
+						</div>
+						<p> (+20) 1068828383 / 1002171672 / 1224785912</p>
+					</div>
+					<div>
+						<div className="flex items-center gap-3 mb-2">
+							<FaLocationArrow className="text-primary text-2xl inline-block mr-2"
+							/>
+						<p className="mt-8">
+							
+							17 Mostafa Rifaat St. Block No.1138 Sheraton area,
+							<br />
+							Heliopolis, Cairo, Egypt.
+						</p></div>
+						
+					</div>
+				</div>
+				<div className="">
+					<p className="text-center text-white text-xl mb-4">
+						Follow Our Socials
+					</p>
+					<div className="flex items-center justify-center gap-8">
+						<a
+							href="https://www.facebook.com/people/Z-Aviation-Services/100063803803378/"
+							className="text-primary text-3xl hover:text-white transition-all duration-300"
+						>
+							<FaFacebook className="" />
+						</a>
+						<a
+							href="#"
+							className="text-primary text-3xl hover:text-white transition-all duration-300"
+						>
+							<FaInstagram className="" />
+						</a>
+						<a
+							href="https://www.linkedin.com/company/z-aviation-services-zas"
+							className="text-primary text-3xl hover:text-white transition-all duration-300"
+						>
+							<FaLinkedin className="" />
+						</a>
+					</div>
+				</div>
+				<div className="flex justify-center h-40 gap-5">
+					{/* <img
+						src="images/catering-certification-ISO-22000-skyculinaire.png"
+						className="h-full"
+						alt=""
+					/>
+					<img
+						src="images/EGAC-accredtied-sky-culinaire-aviation-catering.png"
+						className="h-full"
+						alt=""
+					/> */}
+					<img
+						src="https://zasair.com/imgs/ISBAH-business-aircraft-handling-certified-ZAS.png"
+						className="h-full"
+						alt=""
+					/>
+				</div>
+			</div>
+			{/* <div className="flex flex-wrap justify-center gap-4 mt-12">
         {links.map((link, index) => (
           <>
           <p
@@ -107,8 +142,8 @@ function Footer() {
           {index !== links.length - 1 && <span className='text-primary'>|</span>}
             </>
         ))}
-      </div>
-    </div>
+      </div> */}
+		</div>
   );
 }
 

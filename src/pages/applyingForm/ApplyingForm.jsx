@@ -240,6 +240,11 @@ import { useScreenViewStore } from "../../assets/store/screenViewStore";
 import { uploadToCloudinary } from "../../cloudinary/cloudinary";
 import toast from "react-hot-toast";
 import { nanoid } from "nanoid";
+import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
+
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 /**
  * Updated ApplyingForm.jsx
@@ -308,7 +313,7 @@ export default function ApplyingForm() {
   const [departmentId, setDepartmentId] = useState(0);
 
   const { data: departments } = useQuery({ queryKey: ["departments"], queryFn:GetDepartments });
-  const { data: jobs } = useQuery({ queryKey: ["jobs", departmentId], queryFn:()=> GetJobs(departmentId) });
+  const { data: jobs } = useQuery({ queryKey: ["jobs", 0], queryFn:()=> GetJobs(0) }); //0 is default departmentId
   const { data: socials } = useQuery({ queryKey: ["socials"], queryFn: GetSocials });
   const { data: genders } = useQuery({ queryKey: ["genders"], queryFn: GetGenders });
   const { data: countries } = useQuery({ queryKey: ["countries"], queryFn: GetCountries });
@@ -350,13 +355,13 @@ export default function ApplyingForm() {
 
   const experienceSchema = Yup.object().shape({
     company: Yup.string().trim().required("Company is required"),
-    years: Yup.number().typeError("Must be a number").min(0, "Invalid years").required("Years required"),
+		years: Yup.number().typeError("Must be a number").min(0, "Invalid years").max(new Date().getFullYear(), "Invalid year").required("Years required"),
     role: Yup.string().trim().required("Role is required"),
   });
   const educationSchema = Yup.object().shape({
     institution: Yup.string().trim().required("Institution is required"),
     degree: Yup.string().trim().required("Degree is required"),
-    year: Yup.number().typeError("Must be a year").min(1900, "Invalid year").max(new Date().getFullYear(), "Invalid year").required("Year required"),
+		year: Yup.number().typeError("Must be a year").min(1900, "Invalid year").max(new Date().getFullYear() + 5, "Invalid year").required("Year required"),
     certificate:Yup.mixed()
       .required("Certificate is required")
       
@@ -514,67 +519,96 @@ const handleAutofillFromCV = async (file, setFieldValue) => {
   }
 
   // Helper function to extract data from text
-  const processText = (txt) => {
+	const processText = (txt, explicitNameCandidate = null) => {
     console.log("Processing CV text...");
     const raw = String(txt || "").replace(/\s+/g, " ");
     const lines = txt.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
     
     // DEBUG: Show what we're working with
     console.log("First 3 lines:", lines.slice(0, 3));
-    console.log("Full text (first 1000 chars):", raw.substring(0, 1000));
+		console.log("Full text (first 10000 chars):", raw.substring(0, 10000));
 
-    // ========== EXTRACT NAME ==========
-    // Method 1: Look for name pattern in first few lines
+		// ========== EXTRACT NAME ==========
     let extractedName = null;
     
-    for (let i = 0; i < Math.min(5, lines.length); i++) {
-      const line = lines[i];
-      console.log(`Checking line ${i}: "${line}"`);
-      
-      // Clean the line
-      const cleanLine = line.replace(/[#\*•\-–\|]/g, " ").replace(/\s+/g, " ").trim();
-      
-      // Skip if too short or too long
-      if (cleanLine.length < 4 || cleanLine.length > 50) continue;
-      
-      // Skip if contains email, phone, or URL
-      if (/@|http|www|\.com|github|linkedin|\d{10,}/i.test(cleanLine)) continue;
-      
-      // Split into words
-      const words = cleanLine.split(" ").filter(w => w.length > 0);
-      
-      // Should have 2-3 words for a name
-      if (words.length < 2 || words.length > 4) continue;
-      
-      // Check if words look like names (start with capital letter)
-      const looksLikeName = words.every(word => 
-        /^[A-Z][a-z]*$/.test(word) || 
-        /^[A-Z]$/.test(word) || // Single letter initial
-        /^[A-Z][a-z]*[A-Z][a-z]*$/.test(word) // CamelCase
-      );
-      
-      if (looksLikeName && !/\d/.test(cleanLine)) {
-        extractedName = cleanLine;
-        console.log("✅ Found name:", extractedName);
-        break;
-      }
-    }
-    
-    // Method 2: If not found, try to find the largest text (usually name)
-    if (!extractedName && lines.length > 0) {
-      // Just take the first non-empty line that doesn't look like other info
-      for (const line of lines.slice(0, 3)) {
-        const cleanLine = line.replace(/[#\*]/g, "").trim();
-        const words = cleanLine.split(" ").filter(w => w.length > 0);
-        
-        if (words.length === 2 && 
-            !/\d/.test(cleanLine) && 
-            !/@/.test(cleanLine) &&
-            !/http/.test(cleanLine)) {
-          
-          extractedName = cleanLine;
-          console.log("✅ Found name (fallback):", extractedName);
-          break;
+		// 0. Common blocked lines that are NOT names
+		const IGNORE_LINES = [
+			"curriculum vitae", "resume", "cv", "personal details",
+			"summary", "objective", "profile", "contact", "experience",
+			"education", "skills", "languages", "projects", "certifications",
+			"mobile", "phone", "email", "address", "page", "date of birth",
+			"nationality", "marital status", "gender"
+		];
+
+		// Priority 0: Explicit candidate from PDF metadata (Largest Font)
+		if (explicitNameCandidate) {
+			const cleanCandidate = explicitNameCandidate.trim();
+			const lowerCandidate = cleanCandidate.toLowerCase();
+
+			let valid = true;
+			// Check filtering
+			if (cleanCandidate.length < 4 || cleanCandidate.length > 50) valid = false;
+			if (IGNORE_LINES.some(ignored => lowerCandidate.includes(ignored))) valid = false;
+
+			if (valid) {
+				extractedName = cleanCandidate;
+				console.log("✅ Found name (via Large Font):", extractedName);
+			}
+		}
+
+		// Method 1: Look for explicit "Name:" or "Candidate:" prefix
+		for (const line of lines.slice(0, 20)) { // Scan first 20 lines to be safe
+			const nameMatch = line.match(/^(?:Name|Candidate|Full Name)\s*[:|-]?\s+([A-Za-z\s\.]+)/i);
+			if (nameMatch) {
+				const potentialName = nameMatch[1].trim();
+				// Basic validation: 2-5 words, not too long
+				if (potentialName.split(" ").length >= 2 && potentialName.length < 50) {
+					extractedName = potentialName;
+					console.log("✅ Found name (via prefix):", extractedName);
+					break;
+				}
+			}
+		}
+
+		// Method 2: Improved Heuristic Scanner (if no prefix found)
+		if (!extractedName) {
+			for (let i = 0; i < Math.min(10, lines.length); i++) {
+				const line = lines[i];
+				const cleanLine = line.replace(/[#\*•\-–\|]/g, " ").replace(/\s+/g, " ").trim();
+				const lowerLine = cleanLine.toLowerCase();
+
+				// --- FILTERS ---
+				// 1. Skip empty or very short/long lines
+				if (cleanLine.length < 4 || cleanLine.length > 50) continue;
+
+				// 2. Skip if it's a known header/label
+				if (IGNORE_LINES.some(ignored => lowerLine.includes(ignored))) continue;
+
+				// 3. Skip if contains contact info (email, phone, url, heavy numbers)
+				if (/@|http|www|\.com|github|linkedin|\d{4,}/i.test(cleanLine)) continue;
+
+				// 4. Word Count Check (Names usually 2-4 words)
+				const words = cleanLine.split(" ").filter(w => w.length > 0);
+				if (words.length < 2 || words.length > 5) continue;
+
+				// --- NAME PATTERN CHECK ---
+				// We allow:
+				// - "John Doe" (Capitalized)
+				// - "JOHN DOE" (ALL CAPS)
+				// - "J. Doe" (Initials)
+				// - "de Vries" (Lowercase particles)
+
+				const isAllAlpha = /^[A-Za-z\.\s]+$/.test(cleanLine);
+				if (!isAllAlpha) continue; // Must be letters only (and dot/space)
+
+				// Check casing patterns
+				const isCapitalized = words.every(w => /^[A-Z][a-z\.]*$/.test(w) || /^[a-z]+$/.test(w)); // Allows "Van" or "de"
+				const isAllCaps = words.every(w => /^[A-Z\.]+$/.test(w));
+
+				if (isCapitalized || isAllCaps) {
+					extractedName = cleanLine;
+					console.log("✅ Found name (heuristic):", extractedName);
+					break;
         }
       }
     }
@@ -653,14 +687,163 @@ const handleAutofillFromCV = async (file, setFieldValue) => {
       "Aswan", "Port Said", "Suez", "Ismailia", "Mansoura"
     ];
     
-    for (const city of egyptianCities) {
-      if (txt.includes(city)) {
-        setFieldValue("location.address", city);
-        console.log("✅ Found address/city:", city);
-        break;
-      }
-    }
+
+
+		// ========== SECTION SPLITTING ==========
+		// We split the document into logical sections to avoid cross-contamination
+		const sections = {
+			personal: [],
+			experience: [],
+			education: [],
+			projects: [],
+			skills: []
+		};
+
+		let currentSection = 'personal';
+
+		// Regex for section headers
+		const headers = {
+			experience: /^(?:work|professional|employment)\s+experience|experience|history|employment$/i,
+			education: /^(?:education|academic|qualifications|background)$/i,
+			projects: /^(?:projects|portfolio|assignments)$/i,
+			skills: /^(?:skills|technologies|technical|competencies)$/i
+		};
+
+		lines.forEach(line => {
+			const clean = line.trim().toLowerCase();
+			// Check if line is a header
+			if (clean.length < 30) { // Headers are usually short
+				if (headers.experience.test(clean)) { currentSection = 'experience'; return; }
+				if (headers.education.test(clean)) { currentSection = 'education'; return; }
+				if (headers.projects.test(clean)) { currentSection = 'projects'; return; }
+				if (headers.skills.test(clean)) { currentSection = 'skills'; return; }
+			}
+			sections[currentSection].push(line);
+		});
+
+		console.log("Sections found:", Object.keys(sections).map(k => `${k}: ${sections[k].length} lines`));
+
+		// ========== EXTRACT WORK EXPERIENCE ==========
+		const extractedExperience = [];
+		const expLines = sections.experience;
+
+		for (let i = 0; i < expLines.length; i++) {
+			const line = expLines[i];
+			// Look for year pattern (e.g. 2020 - 2022, Jan 2020 - Present)
+			const yearMatch = line.match(/((?:19|20)\d{2}\s*(?:-|–|to)\s*(?:(?:19|20)\d{2}|Present|Current|Now))/i) ||
+				line.match(/((?:19|20)\d{2})/); // Single year fallback
+
+			if (yearMatch) {
+				// We found a date line. The role/company is usually here or 1-2 lines above.
+				const dateStr = yearMatch[0];
+				let company = "";
+				let role = "";
+				let years = 0;
+
+				// Calculate years roughly
+				try {
+					const parts = dateStr.split(/-|–|to/);
+					const start = parseInt(parts[0].replace(/\D/g, ''));
+					let end = new Date().getFullYear();
+					if (parts[1] && /\d/.test(parts[1])) {
+						end = parseInt(parts[1].replace(/\D/g, ''));
+					}
+					years = Math.max(0, end - start);
+					// If the duration is like "07 2024 - 09 2024", it's < 1 year, round to 1 or 0.5? Logic asks for integer usually.
+					if (years === 0 && dateStr.length > 5) years = 1; // At least partial year
+				} catch (e) { years = 1; }
+
+				// Extract Company/Role
+				// Strategy: Check if the line with date has other info split by | or - or ,
+				const cleanLine = line.replace(dateStr, '').trim();
+				const parts = cleanLine.split(/[|,\-]/).filter(p => p.trim().length > 2);
+
+				if (parts.length >= 2) {
+					// "ZAS | Frontend Engineer | 2025" -> parts: ["ZAS", "Frontend Engineer"]
+					company = parts[0].trim();
+					role = parts[1].trim();
+				} else if (parts.length === 1) {
+					// "Frontend Engineer | 2025" -> assume role? or company?
+					// Heuristic: Check previous line for specific Company Name candidates
+					company = parts[0].trim(); // Guess first part is company
+					// Look at line above for Role
+					if (i > 0) role = expLines[i - 1].trim();
+				} else {
+					// Date is on its own line?
+					// "2023 - 2025"
+					// Line above: "Frontend Engineer"
+					// Line above that: "OPKLEY"
+					if (i > 0) role = expLines[i - 1].trim();
+					if (i > 1) company = expLines[i - 2].trim();
+				}
+
+				// Cleanup
+				if (company.length > 50) company = company.substring(0, 50); // Sanity check
+				if (role.length > 50) role = role.substring(0, 50);
+
+				if (company && role) {
+					extractedExperience.push({
+						company: company,
+						role: role,
+						years: Math.max(1, years) // Minimum 1 year for validity
+					});
+					console.log("✅ Found Experience:", company, role, years);
+				}
+			}
+		}
+		if (extractedExperience.length > 0) {
+			setFieldValue("experiences", extractedExperience);
+		}
+
+		// ========== EXTRACT EDUCATION ==========
+		const extractedEducation = [];
+		const eduLines = sections.education;
+
+		for (let i = 0; i < eduLines.length; i++) {
+			const line = eduLines[i];
+
+			// Detect "University", "College", "Institute", "School"
+			if (/University|College|Institute|School|Faculty/i.test(line)) {
+				const institution = line.trim();
+				let degree = "Bachelor"; // Default
+				let year = 2024; // Default
+
+				// Look for degree in same block (next 2 lines)
+				for (let j = 0; j < 3; j++) {
+					if (i + j >= eduLines.length) break;
+					const subLine = eduLines[i + j];
+
+					// Degree
+					if (/Bachelor|Master|B\.?S\.?c|B\.?A|Degree/i.test(subLine)) {
+						degree = subLine.trim();
+					}
+
+					// Year
+					const yMatch = subLine.match(/(?:19|20)\d{2}/g);
+					if (yMatch) {
+						// Start or End year? usually we want graduation year (the max)
+						const years = yMatch.map(y => parseInt(y));
+						year = Math.max(...years);
+					}
+				}
+
+				extractedEducation.push({
+					institution: institution,
+					degree: degree,
+					year: year,
+					certificate: null // File upload placeholder
+				});
+				console.log("✅ Found Education:", institution, degree, year);
+
+				// Skip a few lines to avoid re-parsing same block
+				i += 2;
+			}
+		}
+		if (extractedEducation.length > 0) {
+			setFieldValue("education", extractedEducation);
+		}
   };
+
 
   // ========== FILE READING ==========
   try {
@@ -698,33 +881,91 @@ const handleAutofillFromCV = async (file, setFieldValue) => {
     
     // Try different reading methods
     if (file.type === 'application/pdf') {
-      // For PDFs, we need to handle binary data
-      console.log("Reading PDF file...");
-      
-      // First try: Read as ArrayBuffer and convert
+			console.log("Reading PDF file with pdfjs-dist...");
       const arrayBufferReader = new FileReader();
       
-      arrayBufferReader.onload = (e) => {
+			arrayBufferReader.onload = async (e) => {
         try {
-          const buffer = e.target.result;
-          const uint8Array = new Uint8Array(buffer);
-          
-          // Convert to string (may contain binary data)
-          let text = '';
-          for (let i = 0; i < Math.min(uint8Array.length, 100000); i++) {
-            // Only include printable characters
-            if (uint8Array[i] >= 32 && uint8Array[i] <= 126) {
-              text += String.fromCharCode(uint8Array[i]);
-            } else if (uint8Array[i] === 10 || uint8Array[i] === 13) {
-              text += '\n';
-            } else {
-              text += ' ';
-            }
+					const typedarray = new Uint8Array(e.target.result);
+
+					// Load the PDF document
+					const loadingTask = pdfjsLib.getDocument(typedarray);
+					const pdf = await loadingTask.promise;
+
+					let fullText = '';
+					let maxFontSize = 0;
+					let maxFontText = '';
+					const usedMaxFontText = new Set(); // Avoid duplicates if same header repeats
+
+					console.log(`PDF loaded. Pages: ${pdf.numPages}`);
+
+					// Loop through all pages
+					for (let i = 1; i <= pdf.numPages; i++) {
+						const page = await pdf.getPage(i);
+						const textContent = await page.getTextContent();
+
+						// --- Improved Line Reconstruction ---
+						// Group items by Y coordinate (within tolerance)
+						const linesDict = {};
+						const Y_TOLERANCE = 5;
+
+						textContent.items.forEach(item => {
+							// item.transform is [scaleX, skewY, skewX, scaleY, x, y]
+							// We use transform[5] as Y coordinate. In PDF, (0,0) is bottom-left usually.
+							// We want to group by Y.
+							const y = item.transform[5] || 0;
+							const fontSize = item.transform[0] || 0; // Approximate font size from scaleX
+							const text = item.str.trim();
+
+							if (!text) return;
+
+							// Check for largest text on Page 1 (usually Name)
+							if (i === 1) {
+								if (fontSize > maxFontSize) {
+									// Found new max, reset
+									maxFontSize = fontSize;
+									maxFontText = text;
+								} else if (Math.abs(fontSize - maxFontSize) < 1 && text.length > maxFontText.length) {
+									// Roughly same size, but longer text? prefer it
+									maxFontText = text;
+								}
+							}
+
+							// Find a matching line group
+							let matchedY = Object.keys(linesDict).find(key => Math.abs(key - y) < Y_TOLERANCE);
+
+							if (!matchedY) {
+								matchedY = y;
+								linesDict[matchedY] = [];
+							}
+
+							linesDict[matchedY].push({ x: item.transform[4], text: item.str });
+						});
+
+						// Sort lines top-to-bottom (PDF Y is bottom-up usually, so higher Y is higher on page)
+						const sortedY = Object.keys(linesDict).sort((a, b) => parseFloat(b) - parseFloat(a));
+
+						const pageLines = sortedY.map(y => {
+							// Sort items in line left-to-right
+							const lineItems = linesDict[y].sort((a, b) => a.x - b.x);
+							return lineItems.map(item => item.text).join(" ");
+						});
+
+						// Join lines with newlines
+						const pageText = pageLines.join("\n");
+						fullText += pageText + '\n\n';
           }
           
-          console.log("Extracted PDF text (first 500 chars):", text.substring(0, 500));
-          processText(text);
-          toast.success("PDF processed successfully!");
+					console.log("Extracted PDF text length:", fullText.length);
+					console.log("Max detected font text:", maxFontText);
+
+					if (!fullText.trim()) {
+						toast.error("PDF appears to be empty or scanned (image-only).");
+					} else {
+						// Pass the max font text as a Priority Candidate for the name
+						processText(fullText, maxFontText);
+						toast.success("PDF processed successfully!");
+					}
           
         } catch (pdfError) {
           console.error("PDF processing error:", pdfError);
@@ -736,6 +977,12 @@ const handleAutofillFromCV = async (file, setFieldValue) => {
       
     } else {
       // For text-based files (DOC, DOCX, TXT)
+			if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+				file.type === 'application/msword') {
+				console.warn("Attempting to read DOC/DOCX as text. This requires a parser like Mammoth.js for best results.");
+				toast.error("Auto-fill fully supports PDF. Word documents might not be read correctly without a parser.");
+			}
+
       console.log("Reading text-based file...");
       reader.readAsText(file);
     }
@@ -986,7 +1233,7 @@ const handleStepClick = async (targetIndex, validateForm, values, setTouched) =>
                  peronalCvsEducations:
   values.education?.map((e, i) => ({
     peronalCvEducationInstitution: e.institution,
-    peronalCvEducationDegree: Number(e.degree),
+		peronalCvEducationDegree: e.degree,
     peronalCvEducationGraduationYear: Number(e.year),
     PeronalCvEducationFileLink: certificates[i],
   })) || [],
@@ -1962,7 +2209,10 @@ const handleStepClick = async (targetIndex, validateForm, values, setTouched) =>
                                         <Field
                                           name={`experiences.${idx}.years`}
                                           placeholder="start year"
-                                          className="w-full rounded-full border border-gray-200 px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none"
+																						className="w-full rounded-full border border-gray-200 px-4 py-2 text-sm bg-white placeholder-gray-400 focus:outline-none"
+																						type="number"
+																						min="1900"
+																						max={new Date().getFullYear()}
                                         />
                                         <ErrorMessage
                                           name={`experiences.${idx}.years`}
