@@ -229,6 +229,7 @@
 
 // ApplyingForm.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage, FieldArray, useFormikContext } from "formik";
 import * as Yup from "yup";
 import { FaTrashAlt } from "react-icons/fa";
@@ -310,10 +311,36 @@ export default function ApplyingForm() {
   const [selectedArea, setSelectedArea] = useState(null);
   const [gapPopup, setGapPopup] = useState(false);
   const [serial, setSerial] = useState(null);
-  const [departmentId, setDepartmentId] = useState(0);
+  const [searchParams] = useSearchParams();
+
+  // Decode parameters safely
+  const decodedParams = useMemo(() => {
+    const d = searchParams.get("d");
+    const j = searchParams.get("j");
+    let deptId = 0;
+    let jobId = 0;
+
+    if (d) {
+      try {
+        deptId = Number(atob(d));
+      } catch (e) {
+        console.error("Failed to decode department ID", e);
+      }
+    }
+    if (j) {
+      try {
+        jobId = Number(atob(j));
+      } catch (e) {
+        console.error("Failed to decode job ID", e);
+      }
+    }
+    return { deptId, jobId };
+  }, [searchParams]);
+
+  const [departmentId, setDepartmentId] = useState(decodedParams.deptId || 0);
 
   const { data: departments } = useQuery({ queryKey: ["departments"], queryFn:GetDepartments });
-  const { data: jobs } = useQuery({ queryKey: ["jobs", 0], queryFn:()=> GetJobs(0) }); //0 is default departmentId
+	const { data: jobs } = useQuery({ queryKey: ["jobs", 0], queryFn: () => GetJobs(0) }); //departmentId
   const { data: socials } = useQuery({ queryKey: ["socials"], queryFn: GetSocials });
   const { data: genders } = useQuery({ queryKey: ["genders"], queryFn: GetGenders });
   const { data: countries } = useQuery({ queryKey: ["countries"], queryFn: GetCountries });
@@ -413,7 +440,7 @@ birthDate: Yup.date()
       }),
   });
 
-  const initialValues = {
+	const initialValues = useMemo(() => ({
     firstName: "",
     middleName: "",
     lastName: "",
@@ -428,15 +455,15 @@ birthDate: Yup.date()
     linkedin: "",
     github: "",
     source: "",
-    department: "",
-    position: "",
+    department: decodedParams.deptId || "",
+    position: decodedParams.jobId || "",
     cover: "",
     photo: null,
     cv: null,
     gender: "",
     experiences: [],
     education: [],
-  };
+  }), [decodedParams]);
 
   // --- STEP WIZARD STATE & settings ---
   const [currentStep, setCurrentStep] = useState(0);
@@ -1180,6 +1207,7 @@ const handleStepClick = async (targetIndex, validateForm, values, setTouched) =>
     <div className="min-h-screen flex items-start justify-center p-6 bg-gradient-to-b from-white to-gray-50 pt-26">
       <div className="w-full max-w-5xl">
         <Formik
+					enableReinitialize={true}
           initialValues={initialValues}
           validationSchema={validationSchema}
           onSubmit={async (values, actions) => {
@@ -1943,6 +1971,7 @@ const handleStepClick = async (targetIndex, validateForm, values, setTouched) =>
                         </label>
                         <Field
                           as="select"
+                          disabled={!!decodedParams.deptId}
                           name="department"
                           onChange={(e) => {
                             setDepartmentId(e.target.value);
@@ -1987,7 +2016,7 @@ const handleStepClick = async (targetIndex, validateForm, values, setTouched) =>
                         </label>
                         <Field
                           as="select"
-                          disabled={!values.department}
+                          disabled={!values.department || !!decodedParams.jobId}
                           name="position"
                           className={`w-full rounded-full ${!values.department && "disabled opacity-50"} border px-4 py-2 pr-10 text-sm ${
                             errors.position && touched.position
