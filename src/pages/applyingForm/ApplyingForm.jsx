@@ -242,10 +242,9 @@ import { uploadToCloudinary } from "../../cloudinary/cloudinary";
 import toast from "react-hot-toast";
 import { nanoid } from "nanoid";
 import * as pdfjsLib from 'pdfjs-dist';
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
 
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+// Configure PDF.js worker using CDN (fixes production bundle issues)
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';
 
 /**
  * Updated ApplyingForm.jsx
