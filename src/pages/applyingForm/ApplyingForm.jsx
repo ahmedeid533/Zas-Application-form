@@ -244,7 +244,7 @@ import { nanoid } from "nanoid";
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Configure PDF.js worker using CDN (fixes production bundle issues)
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.530/pdf.worker.min.mjs';
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@5.4.530/build/pdf.worker.min.mjs';
 
 /**
  * Updated ApplyingForm.jsx
