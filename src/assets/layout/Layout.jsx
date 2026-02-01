@@ -7,17 +7,17 @@ import Loading from "../../pages/loading/Loading";
 import ApplyingForm from "../../pages/applyingForm/ApplyingForm";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import Home from "../../pages/home/Home";
-import Catering from "../../pages/catering/Catering";
-import InflightMeal from "../../pages/inflightMeal/inflightMeal";
-import Contact from "../../pages/contact/Contact";
-import About from "../../pages/about/About";
-import PrivacyPolicy from "../../pages/privacyPolicy/privacyPolicy";
-import Terms from "../../pages/terms/Terms";
-import Menu from "../../pages/menu/Menu";
-import Request from "../../pages/request/Request";
+// import Home from "../../pages/home/Home";
+// import Catering from "../../pages/catering/Catering";
+// import InflightMeal from "../../pages/inflightMeal/inflightMeal";
+// import Contact from "../../pages/contact/Contact";
+// import About from "../../pages/about/About";
+// import PrivacyPolicy from "../../pages/privacyPolicy/privacyPolicy";
+// import Terms from "../../pages/terms/Terms";
+// import Menu from "../../pages/menu/Menu";
+// import Request from "../../pages/request/Request";
 import useCheckAuthUser from "../apis/auth/useCheckAuthUser";
-import Login from "../../pages/login/Login";
+// import Login from "../../pages/login/Login";
 import { IoIosArrowUp } from "react-icons/io";
 
 
