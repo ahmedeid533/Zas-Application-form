@@ -1248,6 +1248,7 @@ const handleStepClick = async (targetIndex, validateForm, values, setTouched) =>
                   personalCvGithubProfile: values.github,
                   personalCvCoverNote: values.cover,
                   personalCvHowNowAboutUsId: Number(values.source),
+                  personalCvHowNowAboutUsName:howDoYouKnew?.find((item) => item.personalHowNowAboutUsId == values.source)?.personalHowNowAboutUsName || "",
                   personalSocialId: Number(values.socialStatus),
                   personalCvUploadPickt: personalImage,
                   personalCvUploadCV: cvUpload,
@@ -2028,6 +2029,37 @@ const handleStepClick = async (targetIndex, validateForm, values, setTouched) =>
                             jobs.map((j) => (
                               <option value={j.jopId} key={j.jopId}>
                                 {j.jopName}
+                              </option>
+                            ))}
+                        </Field>
+                        <ErrorMessage
+                          name="position"
+                          component="div"
+                          className="text-danger text-xs mt-1"
+                        />
+                      </div>
+
+                      <div className="mt-3">
+                        <label className="block text-secondary text-sm mb-1">
+                          How did you hear about us{" "}
+
+                        </label>
+                        <Field
+                          as="select"
+                          name="source"
+                          className={`w-full rounded-full ${!values.department && "disabled opacity-50"} border px-4 py-2 pr-10 text-sm ${
+                            errors.source && touched.source
+                              ? "border-danger"
+                              : "border-gray-200"
+                          }`}
+                        >
+                          {/* <option value="">Select position</option> */}
+                          <option value="">Select how did you know</option>
+                          {howDoYouKnew &&
+                            howDoYouKnew.map((h) => (
+                              
+                              <option value={h.personalHowNowAboutUsId} key={h.personalHowNowAboutUsName}>
+                                {h.personalHowNowAboutUsName}
                               </option>
                             ))}
                         </Field>
